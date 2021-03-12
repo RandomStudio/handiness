@@ -1,0 +1,41 @@
+{
+  "_from": "@mediapipe/drawing_utils",
+  "_id": "@mediapipe/drawing_utils@0.1.1613083488",
+  "_inBundle": false,
+  "_integrity": "sha512-cpKhgZ+Y6v8PgIcR2RBYciChuefKB3RtLInrNiZ6Y0/bJVZT8U0stMrtl/Y/rdQx1Y3mmxuWYlUkfSqAIjY9Kg==",
+  "_location": "/@mediapipe/drawing_utils",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "@mediapipe/drawing_utils",
+    "name": "@mediapipe/drawing_utils",
+    "escapedName": "@mediapipe%2fdrawing_utils",
+    "scope": "@mediapipe",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/@mediapipe/drawing_utils/-/drawing_utils-0.1.1613083488.tgz",
+  "_shasum": "a41b965f4e74d6213c034a36259cb35a371f5fbe",
+  "_spec": "@mediapipe/drawing_utils",
+  "_where": "/mnt/c/Users/Kyunwang/Documents/Spaces/Work/MediaPipe-Hands/tha-wise-monkey-know-wha-leg-fi-clime",
+  "author": {
+    "name": "mhays@google.com"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Mediapipe Simple Drawing Utilities",
+  "homepage": "https://google.github.io/mediapipe/solutions",
+  "license": "Apache-2.0",
+  "main": "",
+  "name": "@mediapipe/drawing_utils",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.1.1613083488"
+}

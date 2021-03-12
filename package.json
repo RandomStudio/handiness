@@ -1,0 +1,30 @@
+{
+  "name": "svelte-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "start": "sirv public"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "rollup": "^2.41.2",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-svelte": "^7.1.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "sass": "^1.32.8",
+    "svelte": "^3.35.0"
+  },
+  "dependencies": {
+    "@anselan/maprange": "^0.6.1",
+    "@mediapipe/drawing_utils": "^0.2.1614797616",
+    "@mediapipe/hands": "^0.1.1614621970",
+    "compute-cosine-similarity": "^1.0.0",
+    "sirv-cli": "^1.0.11",
+    "stats.js": "^0.17.0",
+    "vptree": "^1.0.0"
+  }
+}
