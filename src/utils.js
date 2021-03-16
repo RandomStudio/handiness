@@ -14,8 +14,52 @@ export const cosineDistanceMatching = (vec1, vec2) => {
 	return Math.sqrt(distance);
 }
 
-export const getVec2Distance = (x1, x2, y1, y2) => Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+const calculateAngle = () => {
+    // α = arccos [(b² + c² - a²)/(2bc)]
+    // β = arccos [(a² + c² - b²)/(2ac)]
+    // γ = arccos [(a² + b² - c²)/(2ab)]
 
+	// Point A = Picture Tip
+	// Point B = Webcam Tip
+	// Point C = Edge
+}
+
+
+// One fo the first tries
+// Mgiht there be a 2D raycast of some sort?
+const directionalityLimit = (vec1, vec2) => {
+	// Calculating the limit of the normalized 2D matrix in the direction of the finger
+	
+	// Check which direction the finger is pointing
+	// Tip and last joint - check indexes 
+	const pointingRight = vec2[0] < vec2[3]; // join x < tip x = pointing right
+
+
+	let horizontalEdge;
+
+
+	// Over the edge e.g. 1.5 might work too to keep it all within the camera radius
+	// 
+	if (pointingRight) {
+		horizontalEdge = [1.0, vec2[4]]; // Right edge with the pointing height
+	} else {
+		horizontalEdge = [0.0, vec2[4]]; // Left edge with the pointing height
+	}
+
+
+	
+	// also check if angle is bigger than xxx so that we do not need ot do this if the direction is super flat / horizontal
+	
+	// const radianAngle = 
+
+}
+
+//getVec2Dot([.3,.3], [.4,.35]) * (180 / Math.PI)
+
+// Radian * (180 / Math.PI) = degres
+
+
+// function normalize (val, max, min) { return (val - min) / (max - min); }
 
 let vptree; // where we’ll store a reference to our vptree
 
@@ -24,6 +68,9 @@ export function buildVPTree(poseData) {
 	// vptree = VPTreeFactory.build(poseData, cosineDistanceMatching);
 	vptree = VPTreeFactory.build(poseData, findMostDistanceSimilar);
 }
+
+// const findClosestPointingDirection = ()
+
 
 const findMostDistanceSimilar = (vec1, vec2) => {
 	// vec1 is own input [...] - hadn from mp
@@ -63,25 +110,20 @@ const findMostDistanceSimilar = (vec1, vec2) => {
 
 		// console.info(distanceSimilarity, t, t / 4, y, y / 4)
 		// console.info(y, y / 4, Math.sqrt(y));
-		// console.info(t, t / 4);
+		console.info(t, t / 4);
 
 		return t / 4;
-
-
 	} else {
 		// Ambiguous error 
 		throw new Error('Inputs do not have the same length');
 	}
-
-
-
 }
 
 export const findMostSimilarMatch = (userPose) => {
 	// search the vp tree for the image pose that is nearest (in cosine distance) to userPose
 	let nearestImage = vptree.search(userPose);
 
-	console.info(nearestImage[0]) // cosine distance value of the nearest match
+	// console.info(nearestImage[0]) // cosine distance value of the nearest match
 
 	// return index (in relation to poseData) of nearest match. 
 	return nearestImage[0].i;

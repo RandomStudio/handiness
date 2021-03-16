@@ -4,7 +4,8 @@
 	import initMediaHands from './tracking/initMediaHands';
 	import initCamera from './tracking/initCamera';
 
-	import { getVec2Distance, cosineDistanceMatching, buildVPTree, findMostSimilarMatch } from './utils';
+	import { cosineDistanceMatching, buildVPTree, findMostSimilarMatch } from './utils';
+	import { getVec2Distance, getVec2DirectionEdge } from './vectorHelpers';
 
 	let videoEl;
 	let canvasEl;
@@ -82,15 +83,30 @@
 
 
 				const indexFingerLandmarks = [
-					multiHandLandmarks[index][5],
+					multiHandLandmarks[index][0], // wrist
+					multiHandLandmarks[index][5], // root
 					multiHandLandmarks[index][6],
 					multiHandLandmarks[index][7],
-					multiHandLandmarks[index][8],
+					multiHandLandmarks[index][8], // tip
 				];
 				
 				// Changes size depending on the json used
 				// 
 				const indexFingerVecFloatArr = indexFingerLandmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
+
+
+
+				// const pointingDirCanvasEdge = getVec2DirectionEdge([indexFingerVecFloatArr[0], indexFingerVecFloatArr[1]], [indexFingerVecFloatArr[2], indexFingerVecFloatArr[3]]);
+				
+				
+				
+				
+				
+				
+				// return;
+
+
+
 				// const indexFingerVecFloatArr = [multiHandLandmarks[index][8]].reduce((accum, current) => [...accum, current.x, current.y], []);
 				const mostSimilarMatchIndex = findMostSimilarMatch(indexFingerVecFloatArr);
 				// console.log(mostSimilarMatchIndex);
@@ -175,10 +191,15 @@
 		canvasEl.style.width = '100%';
 		canvasEl.style.height = '100%';
 
+		const data = await fetch('/output.json');
 		// const data = await fetch('/output_full.json');
-		const data = await fetch('/output_index.json');
+		// const data = await fetch('/output_index.json');
 		// const data = await fetch('/output_tip.json');
 		DATASET = await data.json();
+
+		// Test - adding normalized finger pointed direction based on index tip and first connected join
+		// To be added through JSON afterwards in the Python script
+		DATASET = DATASET.map(d => ({ ...d, dest: getVec2DirectionEdge([d[6], d[7]], [d[8], d[9]])}))
 
 		buildVPTree(DATASET.map(d => d.landmarks));
 		
@@ -239,8 +260,8 @@
 		position: absolute;
 		/* left: 0; */
 		/* bottom: 0; */
-		height: 100%;
 		width: 100%;
+		height: 100%;
 	}
 
 	canvas {
