@@ -4,8 +4,8 @@
 	import initMediaHands from './tracking/initMediaHands';
 	import initCamera from './tracking/initCamera';
 
-	import { cosineDistanceMatching, buildVPTree, findMostSimilarMatch } from './utils';
-	import { getVec2Distance, getVec2DirectionEdge } from './vectorHelpers';
+	import { cosineDistanceMatching, buildVPTree, findMostSimilarMatch, findClosestPointDirectionIntersection } from './utils';
+	import { getVec2DirectionEdge } from './vectorHelpers';
 
 	let videoEl;
 	let canvasEl;
@@ -14,118 +14,53 @@
 	let mediaHands;
 
 	let DATASET;
+	let customData;
+
 
 	let activeImage = '';
-
-	// Get closest fingertip
-	const getClosestFingerTip = (finger) => {
-		const imageDistances = DATASET.map((data, index) => ({
-			index,
-			src: data.file,
-			distance: getVec2Distance(finger.x, data.x, finger.y, data.y)
-		})); 
-
-		const closestFinger = imageDistances.sort((a, b) => a.distance - b.distance)[0];
-
-		return closestFinger;
-	}
-
-	// Get average closest finger
-	// Not direction as of yet
-	const getClosestFinger = (finger) => {
-		const imageDistances = DATASET.map((data, index) => {
-			const distance = finger.map((f, i) => {
-				const l = data.landmarks;
-				return getVec2Distance(f.x, l[i * 2], f.y, l[i * 2 + 1]);
-			}).reduce((acc, current) => acc + current, 0) / finger.length;
-
-			
-			return ({
-				index,
-				src: data.file,
-				distance
-			})
-		});
-
-		// const allDistances = finger.map(f => getVec2Distance(f.x, data.x, f.y, data.y))
-
-		const closestFinger = imageDistances.sort((a, b) => a.distance - b.distance)[0];
-
-		return closestFinger;
-	}
-
-	// const getClosestHand
 
 	const handleHandsResults = ({ multiHandLandmarks, multiHandedness, image }) => {
 		if (multiHandedness?.length) {
 			multiHandedness.forEach(({ label }, index) => {
 				debugDrawOverlay({ multiHandLandmarks, multiHandedness, image });
 				
-				// const indexTip = multiHandLandmarks[index][8];
 				const landmarks = multiHandLandmarks[index];
 
-				// const closest = getClosestFingerTip(indexTip);
-				// activeImage = `/images/${closest.src}`;
-
-				// Next up
-
-				// - canvas to be same size as video - or window without weird aspect ratio
-
-				// - render hand skeleton only without the extra video feed on the canvas
-
-				// - try rendering the image same size as the canvas
-
-				// - responsive
-
-				// - UI
-
-				// - other stuff
-
-
 				const indexFingerLandmarks = [
-					multiHandLandmarks[index][0], // wrist
-					multiHandLandmarks[index][5], // root
-					multiHandLandmarks[index][6],
 					multiHandLandmarks[index][7],
 					multiHandLandmarks[index][8], // tip
 				];
-				
+
 				// Changes size depending on the json used
 				// 
 				const indexFingerVecFloatArr = indexFingerLandmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
 
-
-
-				// const pointingDirCanvasEdge = getVec2DirectionEdge([indexFingerVecFloatArr[0], indexFingerVecFloatArr[1]], [indexFingerVecFloatArr[2], indexFingerVecFloatArr[3]]);
 				
-				
-				
-				
-				
-				
-				// return;
-
-
-
-				// const indexFingerVecFloatArr = [multiHandLandmarks[index][8]].reduce((accum, current) => [...accum, current.x, current.y], []);
-				const mostSimilarMatchIndex = findMostSimilarMatch(indexFingerVecFloatArr);
-				// console.log(mostSimilarMatchIndex);
-				activeImage = `/images/${DATASET[mostSimilarMatchIndex].file}`;
-
-				// console.log(findMostDistanceSimilar());
-
-				// console.info(indexFingerVecFloatArr, DATASET[mostSimilarMatchIndex].landmarks)
+				const pointingDirCanvasEdge = getVec2DirectionEdge([indexFingerVecFloatArr[0], indexFingerVecFloatArr[1]], [indexFingerVecFloatArr[2], indexFingerVecFloatArr[3]]);
 				
 
+				const directionArr = [...indexFingerVecFloatArr, ...pointingDirCanvasEdge];
 
-				// const closestAverageIndex = getClosestFinger(indexFingerLandmarks);
-				// activeImage = `/images/${closestAverageIndex.src}`;
+				
+				// Requires same length as build in VPTree being 4 - got only 1 relevant vector thwough (length of 2)
+				// last two being relevant here for the comparison function
+				// const test = findMostSimilarMatch(indexFingerVecFloatArr.slice(indexFingerVecFloatArr.length - 4, indexFingerVecFloatArr.length));
 
 
-				// const closestFingerTip = getClosestFinger([multiHandLandmarks[index][8]]);
-				// console.info(closestFingerTip)
-				// activeImage = `/images/${closestFingerTip.src}`;
 
+				const t = customData.map((d, i) => {
+
+					return {i, d: findClosestPointDirectionIntersection(directionArr, d)};
+				}).filter(e => e.d).sort((a, b) => a.d - b.d);
+
+				// console.log(customData, directionArr);
+
+				// console.info('return val', t, t[0].i, t[t.length - 1]);
+				const mostSimilarMatchIndex = t[0]?.i
+
+				if (mostSimilarMatchIndex) {
+					activeImage = `/images/${DATASET[mostSimilarMatchIndex].file}`;
+				}
 			});
 		} else {
 			activeImage = '';
@@ -150,12 +85,6 @@
 				const isRightHand = classification.label === 'Right';
 				const landmarks = results.multiHandLandmarks[index];
 
-				// const indexFingerLandmarks = [
-				// 	landmarks[5],
-				// 	landmarks[6],
-				// 	landmarks[7],
-				// 	landmarks[8],
-				// ];
 				const indexFingerLandmarks = landmarks;
 
 				drawConnectors(
@@ -176,7 +105,10 @@
 		// Stuff to do here
 		await mediaHands.send({ image: videoEl });
 
-		requestAnimationFrame(render);
+		// requestAnimationFrame(render);
+
+		// setTimeout(render, 1000 / 24);
+		setTimeout(render, 1000 / 12);
 	}
 	
 	onDestroy(() => {
@@ -184,8 +116,6 @@
 	});
 
 	onMount(async () => {
-		// canvasEl.width = canvasEl.offsetWidth;
-		// canvasEl.height = canvasEl.offsetHeight;
 		canvasEl.width = videoEl.offsetWidth;
 		canvasEl.height = videoEl.offsetHeight;
 		canvasEl.style.width = '100%';
@@ -197,13 +127,18 @@
 		// const data = await fetch('/output_tip.json');
 		DATASET = await data.json();
 
+		// buildVPTree(DATASET.map(d => d.landmarks));
+
+
+
 		// Test - adding normalized finger pointed direction based on index tip and first connected join
 		// To be added through JSON afterwards in the Python script
-		DATASET = DATASET.map(d => ({ ...d, dest: getVec2DirectionEdge([d[6], d[7]], [d[8], d[9]])}))
-
-		buildVPTree(DATASET.map(d => d.landmarks));
-		
-		console.log('Before camera --- ');
+		// Input does not require two vectors though but need s to be same lenght for search
+		DATASET = DATASET.map(d => {
+			return ({ ...d, dest: getVec2DirectionEdge([d.landmarks[6], d.landmarks[7]], [d.landmarks[8], d.landmarks[9]])
+		})});
+		buildVPTree(DATASET.map(d => [...d.landmarks.slice(d.landmarks.length - 4, d.landmarks.length),  ...d.dest]));
+		customData = DATASET.map(d => [...d.landmarks.slice(d.landmarks.length - 4, d.landmarks.length),  ...d.dest]);
 		
 		canvasContext = canvasEl.getContext('2d');
 

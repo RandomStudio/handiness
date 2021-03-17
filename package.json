@@ -19,7 +19,7 @@
     "svelte": "^3.35.0"
   },
   "dependencies": {
-    "@anselan/maprange": "^0.6.1",
+    "@anselan/maprange": "^0.6.2",
     "@mediapipe/drawing_utils": "^0.2.1614797616",
     "@mediapipe/hands": "^0.1.1614621970",
     "compute-cosine-similarity": "^1.0.0",
