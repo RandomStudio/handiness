@@ -1,8 +1,6 @@
 import similarity from 'compute-cosine-similarity';
 import VPTreeFactory from 'vptree';
 
-import { getIntersectionPoint, getVec2Distance } from './vectorHelpers';
-
 let vptree; // where we’ll store a reference to our vptree
 
 
@@ -31,42 +29,6 @@ const calculateAngle = () => {
 }
 
 
-// One fo the first tries
-// Mgiht there be a 2D raycast of some sort?
-const directionalityLimit = (vec1, vec2) => {
-	// Calculating the limit of the normalized 2D matrix in the direction of the finger
-
-	// Check which direction the finger is pointing
-	// Tip and last joint - check indexes
-	const pointingRight = vec2[0] < vec2[3]; // join x < tip x = pointing right
-
-
-	let horizontalEdge;
-
-
-	// Over the edge e.g. 1.5 might work too to keep it all within the camera radius
-	//
-	if (pointingRight) {
-		horizontalEdge = [1.0, vec2[4]]; // Right edge with the pointing height
-	} else {
-		horizontalEdge = [0.0, vec2[4]]; // Left edge with the pointing height
-	}
-
-
-
-	// also check if angle is bigger than xxx so that we do not need ot do this if the direction is super flat / horizontal
-
-	// const radianAngle =
-
-}
-
-//getVec2Dot([.3,.3], [.4,.35]) * (180 / Math.PI)
-
-// Radian * (180 / Math.PI) = degres
-
-
-// function normalize (val, max, min) { return (val - min) / (max - min); }
-
 const findMostDistanceSimilar = (vec1, vec2) => {
 	// vec1 is own input [...] - hadn from mp
 	// vec2 is from dataset [...]
@@ -79,10 +41,10 @@ const findMostDistanceSimilar = (vec1, vec2) => {
 		// Get total average distance of the whole
 		// Our case being a index finger
 		const distanceSimilarity = [];
-		let t = 0;
+		let averageDistance = 0;
 
 
-		for (let index = 0; index < 4; index++) {
+		for (let index = 0; index < vec1.length; index++) {
 			const v1x = vec1[index];
 			const v1y = vec1[index] * 2 + 1;
 			const v2x = vec2[index];
@@ -95,14 +57,14 @@ const findMostDistanceSimilar = (vec1, vec2) => {
 			const distance = Math.sqrt(Math.pow((v1x - v2x), 2) + Math.pow((v1y - v2y), 2));
 
 			distanceSimilarity.push(distance);
-			t += distance;
+			averageDistance += distance;
 		}
 
 		// console.info(distanceSimilarity, t, t / 4, y, y / 4)
 		// console.info(y, y / 4, Math.sqrt(y));
 		// console.info(t, t / 4);
 
-		return t / 4;
+		return averageDistance / vec1.length;
 	} else {
 		// Ambiguous error
 		throw new Error('Inputs do not have the same length');
@@ -110,39 +72,12 @@ const findMostDistanceSimilar = (vec1, vec2) => {
 }
 
 
-
-export const findClosestPointDirectionIntersection = (vec1, vec2) => {
-	if (!vec1.length) {
-		return null;
-	}
-
-	if (vec1.length === vec2.length) {
-		const intersectionPoint = getIntersectionPoint([vec1[2], vec1[3]], [vec1[4], vec1[5]], [vec2[2], vec2[3]], [vec2[4], vec2[5]]);
-
-		// console.info(intersectionPoint);
-
-		if (intersectionPoint) {
-			const distanceToIntersection = getVec2Distance([vec1[2], vec1[3]], intersectionPoint);
-
-			// console.info(`INTERSECTION: ${distanceToIntersection}`);
-
-
-			return distanceToIntersection;
-		} else {
-			return null;
-		}
-	} else {
-		// Ambiguous error
-		throw new Error('Inputs do not have the same length');
-	}
-}
 
 
 export const buildVPTree = (poseData) => {
 	// Initialize our vptree with our images’ pose data and a distance function
-	// vptree = VPTreeFactory.build(poseData, cosineDistanceMatching);
+	vptree = VPTreeFactory.build(poseData, cosineDistanceMatching);
 	// vptree = VPTreeFactory.build(poseData, findMostDistanceSimilar);
-	vptree = VPTreeFactory.build(poseData, findClosestPointDirectionIntersection);
 }
 
 
