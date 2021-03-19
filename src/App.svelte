@@ -38,18 +38,7 @@
 				const landmarksVecFloatArr = landmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
 				// const mirrorVecFloatArr = mirrorLandmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
 
-
-				// console.info(arr, mirrorVecFloatArr);
-				// const classification = multiHandedness[index];
-				// const isRightHand = classification.label === 'Right';
-				// drawConnectors(
-				// 	canvasContext, mirrorLandmarks, HAND_CONNECTIONS,
-				// 	{color: isRightHand ? '#00FF00' : '#FF0000'});
-					
-				// drawLandmarks(canvasContext, mirrorLandmarks, {
-				// 	color: isRightHand ? '#00FF00' : '#FF0000',
-				// 	fillColor: isRightHand ? '#FF0000' : '#00FF00',
-				// });
+	
 
 				const closestIndex = findMostSimilarMatch(landmarksVecFloatArr);
 
@@ -61,8 +50,11 @@
 						canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
 						canvasContext.save();
-						// TODO: Change what to scale depending on whether the image is portrait or landscape and size dominance compared to the window size
-						const scaled = canvasEl.width / imageEl.width;
+						// Check image orientation
+						const isPortrait = canvasEl.height > canvasEl.width;
+						
+						const scaled = isPortrait ? canvasEl.height / imageEl.height : canvasEl.width / imageEl.width;
+
 
 						// Offset in image resolution space
 						const offsetHandToCenterX = (1 - closestHand.center[0] - 0.5) * imageEl.width * scaled;
@@ -76,14 +68,12 @@
 						// Translate takes into account the inverted scale of X
 						canvasContext.translate(canvasEl.width / 2 + scaledMoveX, canvasEl.height / 2 - scaledMoveY);
 						canvasContext.scale(-1, 1);
-						canvasContext.drawImage(imageEl, -offsetHandToCenterX, -offsetHandToCenterY, canvasEl.width, imageEl.height * scaled);
+						canvasContext.drawImage(imageEl, -offsetHandToCenterX, -offsetHandToCenterY, imageEl.width * scaled , imageEl.height * scaled);
 						
 						canvasContext.restore();
 
 
 						debugDrawOverlay({ multiHandLandmarks, multiHandedness, image });
-
-
 
 
 						// const copy = [...landmarks];
