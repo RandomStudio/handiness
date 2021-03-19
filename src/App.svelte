@@ -7,6 +7,7 @@
 	import { buildVPTree, findMostSimilarMatch } from './utils';
 
 	let videoEl;
+	let imageEl;
 	let canvasEl;
 	let canvasContext;
 
@@ -19,42 +20,23 @@
 	const handleHandsResults = ({ multiHandLandmarks, multiHandedness, image }) => {
 		if (multiHandedness?.length) {
 			multiHandedness.forEach(({ label }, index) => {
-				debugDrawOverlay({ multiHandLandmarks, multiHandedness, image });
-				
 				const landmarks = multiHandLandmarks[index];
 
-				// const indexFingerLandmarks = [
-				// 	multiHandLandmarks[index][7],
-				// 	multiHandLandmarks[index][8], // tip
-				// ];
+				// const indexTipAsOrigin = multiHandLandmarks[index][8]; 
+				// const mirrorLandmarks = landmarks.map(({ x, y }) => {
+				// 	const differenceX = indexTipAsOrigin.x - x;
+				// 	const differenceY = indexTipAsOrigin.y - y;
 
-				// Changes size depending on the json used
-				// 
-				// const indexFingerVecFloatArr = indexFingerLandmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
-				
+				// 	// get distance between origin and joint x
+				// 	const mirrorX = indexTipAsOrigin.x + differenceX;
+				// 	const mirrorY = indexTipAsOrigin.y + differenceY;
 
-
-				const indexTipAsOrigin = multiHandLandmarks[index][8]; 
-				
-				const mirrorLandmarks = landmarks.map(({ x, y }) => {
-					// tip as origin -> need reference
-
-					// origin - point = difference
-
-					const differenceX = indexTipAsOrigin.x - x;
-					const differenceY = indexTipAsOrigin.y - y;
-
-					// get distance between origin and joint x
-
-					const mirrorX = indexTipAsOrigin.x + differenceX;
-					const mirrorY = indexTipAsOrigin.y + differenceY;
-
-					return { x: mirrorX, y: mirrorY }
-				});
+				// 	return { x: mirrorX, y: mirrorY }
+				// });
 
 				// Float 42
-				const arr = landmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
-				const mirrorVecFloatArr = mirrorLandmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
+				const landmarksVecFloatArr = landmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
+				// const mirrorVecFloatArr = mirrorLandmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
 
 
 				// console.info(arr, mirrorVecFloatArr);
@@ -69,10 +51,52 @@
 				// 	fillColor: isRightHand ? '#FF0000' : '#00FF00',
 				// });
 
-				const closestIndex = findMostSimilarMatch(arr);
+				const closestIndex = findMostSimilarMatch(landmarksVecFloatArr);
 
 				if (closestIndex) {
-					activeImage = `/images-train-ann/${DATASET[closestIndex].file}`;
+					const closestHand = DATASET[closestIndex];
+					activeImage = `/images-train-ann/${closestHand.file}`;
+
+					if (imageEl) {
+						canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height);
+
+						canvasContext.save();
+						// TODO: Change what to scale depending on whether the image is portrait or landscape and size dominance compared to the window size
+						const scaled = canvasEl.width / imageEl.width;
+
+						// Offset in image resolution space
+						const offsetHandToCenterX = (1 - closestHand.center[0] - 0.5) * imageEl.width * scaled;
+						const offsetHandToCenterY = (closestHand.center[1] - 0.5) * imageEl.height * scaled;
+
+						const scaledMoveX = imageEl.width * scaled / 2;
+						const scaledMoveY = imageEl.height * scaled / 2;
+						
+						// On Flipping: + for x flipped || - if non flipped image
+						// Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
+						// Translate takes into account the inverted scale of X
+						canvasContext.translate(canvasEl.width / 2 + scaledMoveX, canvasEl.height / 2 - scaledMoveY);
+						canvasContext.scale(-1, 1);
+						canvasContext.drawImage(imageEl, -offsetHandToCenterX, -offsetHandToCenterY, canvasEl.width, imageEl.height * scaled);
+						
+						canvasContext.restore();
+
+
+						debugDrawOverlay({ multiHandLandmarks, multiHandedness, image });
+
+
+
+
+						// const copy = [...landmarks];
+						// const sortedY = copy.sort((a, b) => a.y - b.y);
+
+						// // 1 - because we flipped X
+						// const centerX = copy.reduce((accum, current) => accum + current.x, 0) / copy.length;
+						// const centerY = copy.reduce((accum, current) => accum + current.y, 0) / copy.length;
+
+						// console.info(centerX * canvasEl.width, centerY * canvasEl.height);
+						// canvasContext.fillStyle = 'yellow';
+						// canvasContext.fillRect(centerX * canvasEl.width, centerY * canvasEl.height, 15, 15);
+					}
 				}
 			});
 		} else {
@@ -89,9 +113,6 @@
 
 	const debugDrawOverlay = (results) => {
 		canvasContext.save();
-		canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height);
-		// canvasContext.drawImage(results.image, 0, 0, canvasEl.width, canvasEl.height);
-
 		if (results.multiHandLandmarks && results.multiHandedness) {
 			for (let index = 0; index < results.multiHandLandmarks.length; index++) {
 				const classification = results.multiHandedness[index];
@@ -163,10 +184,8 @@
 	<div>
 		<video bind:this={videoEl} />
 		
-		{#if activeImage}
-			<!-- svelte-ignore a11y-missing-attribute -->
-			<img src={activeImage} />
-		{/if}
+		<!-- svelte-ignore a11y-missing-attribute -->
+		<img bind:this={imageEl} src={activeImage} />
 
 		<canvas bind:this={canvasEl} />
 		
@@ -185,21 +204,23 @@
 		width: 100%;
 		height: 100%;
 	}
+
+	img {
+		display: none; 
+	}
 	
 	video, img {
 		transform: scaleX(-1);
 	}
 
+
 	video, canvas, img {
 		position: absolute;
-		/* left: 0; */
-		/* bottom: 0; */
 		width: 100%;
 		height: 100%;
 	}
 
 	canvas {
-		/* transform: scaleX(1); */
 		height: initial;
 	}
 </style>
