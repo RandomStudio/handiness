@@ -14,74 +14,78 @@
 	export let mediaHands;
 	export let DATASET;
 
-	const handleHandsResults = ({ multiHandLandmarks, multiHandedness, image }) => {
+	const handleHandsResults = ({
+		multiHandLandmarks,
+		multiHandedness,
+		image,
+	}) => {
 		if (multiHandedness?.length) {
 			multiHandedness.forEach(({ label }, index) => {
 				const landmarks = multiHandLandmarks[index];
 
 				// Float 42
-				const landmarksVecFloatArr = landmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
+				const landmarksVecFloatArr = landmarks.reduce(
+					(accum, current) => [...accum, current.x, current.y],
+					[]
+				);
 
 				const closestIndex = findMostSimilarMatch(landmarksVecFloatArr);
 
 				if (closestIndex) {
-					const closestHand = DATASET[closestIndex];
+					const closestHand = DATASET[closestIndex]
 					activeImage = `/images-train/${closestHand.file}`;
 
-					if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
-						// canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
+					if (
+						imageEl.src.includes(activeImage) &&
+						activeImage !== prevActiveImage
+					) {
+						// activeImages.push(activeImage)
+						// if (activeImages.length > 10) {
+						// 	canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height)
+						// 	activeImages.splice(0, activeImages.length)
+						// }
 						canvasContext.save();
-
 
 						// Check image orientation
 						// const isPortrait = canvasEl.height > canvasEl.width;
 						// const scaled = isPortrait ? canvasEl.height / imageEl.height : canvasEl.width / imageEl.width;
-						
+
 						const scaled = 1;
 
-
 						// Offset in image resolution space
-						const offsetHandToCenterX = (1 - closestHand.center[0] - 0.5) * imageEl.width * scaled;
-						const offsetHandToCenterY = (closestHand.center[1] - 0.5) * imageEl.height * scaled;
+						const offsetHandToCenterX =
+							(1 - closestHand.center[0] - 0.5) * imageEl.width * scaled;
+						const offsetHandToCenterY =
+							(closestHand.center[1] - 0.5) * imageEl.height * scaled;
 
-						const scaledMoveX = imageEl.width * scaled / 2;
-						const scaledMoveY = imageEl.height * scaled / 2;
-						
+						const scaledMoveX = (imageEl.width * scaled) / 2;
+						const scaledMoveY = (imageEl.height * scaled) / 2;
+
 						canvasContext.globalAlpha = 0.75;
 
 						// On Flipping: + for x flipped || - if non flipped image
 						// Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
 						// Translate takes into account the inverted scale of X
-						canvasContext.translate(canvasEl.width / 2 + scaledMoveX, canvasEl.height / 2 - scaledMoveY);
+						canvasContext.translate(
+							canvasEl.width / 2 + scaledMoveX,
+							canvasEl.height / 2 - scaledMoveY
+						);
 						canvasContext.scale(-1, 1);
-						canvasContext.drawImage(imageEl, -offsetHandToCenterX, -offsetHandToCenterY, imageEl.width * scaled , imageEl.height * scaled);
-						
+						canvasContext.drawImage(
+							imageEl,
+							-offsetHandToCenterX,
+							-offsetHandToCenterY,
+							imageEl.width * scaled,
+							imageEl.height * scaled
+						);
+
 						canvasContext.restore();
 
-
-						// canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height);
-
-
-
-						// debugDrawOverlay({ multiHandLandmarks, multiHandedness, image });
-
-
-						// const copy = [...landmarks];
-						// const sortedY = copy.sort((a, b) => a.y - b.y);
-
-						// // 1 - because we flipped X
-						// const centerX = copy.reduce((accum, current) => accum + current.x, 0) / copy.length;
-						// const centerY = copy.reduce((accum, current) => accum + current.y, 0) / copy.length;
-
-						// console.info(centerX * canvasEl.width, centerY * canvasEl.height);
-						// canvasContext.fillStyle = 'yellow';
-						// canvasContext.fillRect(centerX * canvasEl.width, centerY * canvasEl.height, 15, 15);
-						
-						prevActiveIamge = activeImage;
+						prevActiveImage = activeImage;
 					}
 				}
-			});
+			})
 		} else {
 			activeImage = '';
 		}
@@ -95,6 +99,7 @@
 		// requestAnimationFrame(render);
 
 		// setTimeout(render, 1000 / 36);
+		// setTimeout(render, 1000 / 30);
 		setTimeout(render, 1000 / 24);
 		// setTimeout(render, 1000 / 12);
 	}
@@ -175,6 +180,7 @@
 	}
 
 	img {
+		/* position: absolute; */
 		display: none; 
 	}
 	
