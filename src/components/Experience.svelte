@@ -8,6 +8,7 @@
 	let canvasContext;
 
 	let activeImage = '';
+	let prevActiveImage;
 
 	export let videoEl;
 	export let mediaHands;
@@ -25,16 +26,19 @@
 
 				if (closestIndex) {
 					const closestHand = DATASET[closestIndex];
-					activeImage = `/images-train-ann/${closestHand.file}`;
+					activeImage = `/images-train/${closestHand.file}`;
 
-					if (imageEl) {
-						canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height);
+					if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
+						// canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
 						canvasContext.save();
+
+
 						// Check image orientation
-						const isPortrait = canvasEl.height > canvasEl.width;
+						// const isPortrait = canvasEl.height > canvasEl.width;
+						// const scaled = isPortrait ? canvasEl.height / imageEl.height : canvasEl.width / imageEl.width;
 						
-						const scaled = isPortrait ? canvasEl.height / imageEl.height : canvasEl.width / imageEl.width;
+						const scaled = 1;
 
 
 						// Offset in image resolution space
@@ -44,10 +48,11 @@
 						const scaledMoveX = imageEl.width * scaled / 2;
 						const scaledMoveY = imageEl.height * scaled / 2;
 						
+						canvasContext.globalAlpha = 0.75;
+
 						// On Flipping: + for x flipped || - if non flipped image
 						// Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
 						// Translate takes into account the inverted scale of X
-						canvasContext.globalAlpha = 0.5;
 						canvasContext.translate(canvasEl.width / 2 + scaledMoveX, canvasEl.height / 2 - scaledMoveY);
 						canvasContext.scale(-1, 1);
 						canvasContext.drawImage(imageEl, -offsetHandToCenterX, -offsetHandToCenterY, imageEl.width * scaled , imageEl.height * scaled);
@@ -55,7 +60,11 @@
 						canvasContext.restore();
 
 
-						debugDrawOverlay({ multiHandLandmarks, multiHandedness, image });
+						// canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height);
+
+
+
+						// debugDrawOverlay({ multiHandLandmarks, multiHandedness, image });
 
 
 						// const copy = [...landmarks];
@@ -68,6 +77,8 @@
 						// console.info(centerX * canvasEl.width, centerY * canvasEl.height);
 						// canvasContext.fillStyle = 'yellow';
 						// canvasContext.fillRect(centerX * canvasEl.width, centerY * canvasEl.height, 15, 15);
+						
+						prevActiveIamge = activeImage;
 					}
 				}
 			});
@@ -83,6 +94,7 @@
 
 		// requestAnimationFrame(render);
 
+		// setTimeout(render, 1000 / 36);
 		setTimeout(render, 1000 / 24);
 		// setTimeout(render, 1000 / 12);
 	}
@@ -112,9 +124,9 @@
 		mediaHands.onResults(handleHandsResults);
 
 		render();
+		onResize();
 
 		window.addEventListener('resize', onResize);
-
 	});
 
 
