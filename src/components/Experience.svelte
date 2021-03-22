@@ -5,69 +5,134 @@
 	let imageEl;
 	let canvasEl;
 	let canvasContext;
+	let handCanvasEl;
+	let handCanvasContext;
 
 	let activeImage = '';
+	let activeImages = [];
 	let prevActiveImage;
 
 	export let videoEl;
 	export let mediaHands;
 	export let DATASET;
 
-	const handleHandsResults = ({ multiHandLandmarks, multiHandedness, image }) => {
+	const drawImages = (landmarks) => {
+		// Float 42
+		const landmarksVecFloatArr = landmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
+
+		const closestIndex = findMostSimilarMatch(landmarksVecFloatArr);
+
+		if (closestIndex) {
+			const closestHand = DATASET[closestIndex];
+			activeImage = `/images-train/${closestHand.file}`;
+
+			if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
+				activeImages.push(activeImage);
+				if (activeImages.length > 10) {
+					canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height);
+					activeImages.splice(0, activeImages.length);
+				}
+
+				canvasContext.save();
+
+				// Check image orientation
+				// Scale image relatively in aspect ratio to take the full height or width of the screen at the very least
+				// const isPortrait = canvasEl.height > canvasEl.width;
+				// const scaled = isPortrait ? canvasEl.height / imageEl.height : canvasEl.width / imageEl.width;
+
+				// Calculate the required scaling to normalize the hand bbox/size of all images
+				const landmarkCopies = [...landmarks];
+				const { [0]: firstX, [landmarkCopies.length - 1]: lastX } = landmarkCopies.sort((a, b) => a.x - b.x);
+				const { [0]: firstY, [landmarkCopies.length - 1]: lastY } = landmarkCopies.sort((a, b) => a.y - b.y);
+
+				const cornerLeftTop = [firstX.x, firstY.y];
+				const cornerRightBottom = [lastX.x, lastY.y];
+
+				// Should change depending on resolution :thinking
+				const xDiff = 0.15 / (cornerRightBottom[0] - cornerLeftTop[0]);
+				const yDiff = 0.15 / (cornerRightBottom[1] - cornerLeftTop[1]);
+
+				// const scaled = (xDiff > yDiff ? xDiff : yDiff) * 1.25;
+				const scaled = yDiff * 1.5;
+
+				// Offset in image resolution space
+				const offsetHandToCenterX = (1 - closestHand.center[0] - 0.5) * imageEl.width * scaled;
+				const offsetHandToCenterY = (closestHand.center[1] - 0.5) * imageEl.height * scaled;
+
+				const scaledMoveX = (imageEl.width * scaled) / 2;
+				const scaledMoveY = (imageEl.height * scaled) / 2;
+
+				canvasContext.globalAlpha = 0.75;
+
+				// On Flipping: + for x flipped || - if non flipped image
+				// Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
+				// Translate takes into account the inverted scale of X
+				canvasContext.translate(canvasEl.width / 2 + scaledMoveX, canvasEl.height / 2 - scaledMoveY);
+				canvasContext.shadowOffsetX = 5;
+				canvasContext.shadowOffsetY = 3;
+				canvasContext.shadowColor = 'white';
+				canvasContext.shadowBlur = 30;
+
+				canvasContext.scale(-1, 1);
+				canvasContext.drawImage(
+					imageEl,
+					-offsetHandToCenterX,
+					-offsetHandToCenterY,
+					imageEl.width * scaled,
+					imageEl.height * scaled,
+				);
+
+				canvasContext.strokeRect(
+					-offsetHandToCenterX,
+					-offsetHandToCenterY,
+					imageEl.width * scaled,
+					imageEl.height * scaled,
+				);
+
+				canvasContext.restore();
+
+				prevActiveImage = activeImage;
+			}
+		}
+	};
+
+	const drawHands = (results) => {
+		handCanvasContext.save();
+
+		handCanvasContext.clearRect(0, 0, handCanvasEl.width, handCanvasEl.height);
+		if (results.multiHandLandmarks && results.multiHandedness) {
+			for (let index = 0; index < results.multiHandLandmarks.length; index++) {
+				const classification = results.multiHandedness[index];
+				const isRightHand = classification.label === 'Right';
+				const landmarks = results.multiHandLandmarks[index];
+
+				drawConnectors(handCanvasContext, landmarks, HAND_CONNECTIONS, {
+					color: isRightHand ? '#00FF00' : '#FF0000',
+					lineWidth: 2,
+				});
+
+				drawLandmarks(handCanvasContext, landmarks, {
+					color: isRightHand ? '#00FF00' : '#FF0000',
+					fillColor: isRightHand ? '#FF0000' : '#00FF00',
+					lineWidth: 2,
+					radius: 1
+				});
+			}
+		}
+
+		handCanvasContext.restore();
+	};
+
+	const handleHandsResults = (results) => {
+		const { multiHandLandmarks, multiHandedness, image } = results;
+
 		if (multiHandedness?.length) {
 			multiHandedness.forEach(({ label }, index) => {
 				const landmarks = multiHandLandmarks[index];
 
-				// Float 42
-				const landmarksVecFloatArr = landmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
+				drawImages(landmarks);
 
-				const closestIndex = findMostSimilarMatch(landmarksVecFloatArr);
-
-				if (closestIndex) {
-					const closestHand = DATASET[closestIndex];
-					activeImage = `/images-train/${closestHand.file}`;
-
-					if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
-						// activeImages.push(activeImage)
-						// if (activeImages.length > 10) {
-						// 	canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height)
-						// 	activeImages.splice(0, activeImages.length)
-						// }
-						canvasContext.save();
-
-						// Check image orientation
-						// const isPortrait = canvasEl.height > canvasEl.width;
-						// const scaled = isPortrait ? canvasEl.height / imageEl.height : canvasEl.width / imageEl.width;
-
-						const scaled = 1;
-
-						// Offset in image resolution space
-						const offsetHandToCenterX = (1 - closestHand.center[0] - 0.5) * imageEl.width * scaled;
-						const offsetHandToCenterY = (closestHand.center[1] - 0.5) * imageEl.height * scaled;
-
-						const scaledMoveX = (imageEl.width * scaled) / 2;
-						const scaledMoveY = (imageEl.height * scaled) / 2;
-
-						canvasContext.globalAlpha = 0.75;
-
-						// On Flipping: + for x flipped || - if non flipped image
-						// Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
-						// Translate takes into account the inverted scale of X
-						canvasContext.translate(canvasEl.width / 2 + scaledMoveX, canvasEl.height / 2 - scaledMoveY);
-						canvasContext.scale(-1, 1);
-						canvasContext.drawImage(
-							imageEl,
-							-offsetHandToCenterX,
-							-offsetHandToCenterY,
-							imageEl.width * scaled,
-							imageEl.height * scaled,
-						);
-
-						canvasContext.restore();
-
-						prevActiveImage = activeImage;
-					}
-				}
+				drawHands(results);
 			});
 		} else {
 			activeImage = '';
@@ -82,8 +147,9 @@
 
 		// setTimeout(render, 1000 / 36);
 		// setTimeout(render, 1000 / 30);
-		setTimeout(render, 1000 / 24);
-		// setTimeout(render, 1000 / 12);
+		// setTimeout(render, 1000 / 24);
+		// setTimeout(render, 1000 / 20);
+		setTimeout(render, 1000 / 12);
 	};
 
 	const onResize = () => {
@@ -98,12 +164,10 @@
 	});
 
 	onMount(() => {
-		canvasEl.width = window.innerHeight;
-		canvasEl.height = window.innerHeight;
-		canvasEl.style.width = '100%';
-		canvasEl.style.height = '100%';
-
 		canvasContext = canvasEl.getContext('2d');
+		handCanvasContext = handCanvasEl.getContext('2d');
+
+		console.info(videoEl, videoEl.width);
 
 		mediaHands.onResults(handleHandsResults);
 
@@ -135,12 +199,11 @@
 </script>
 
 <div>
-	<!-- <video bind:this={videoEl} /> -->
-
 	<!-- svelte-ignore a11y-missing-attribute -->
 	<img bind:this={imageEl} src={activeImage} />
 
-	<canvas bind:this={canvasEl} />
+	<canvas class="main-canvas" bind:this={canvasEl} />
+	<canvas class="hand-canvas" bind:this={handCanvasEl} />
 </div>
 
 <style>
@@ -151,13 +214,23 @@
 	}
 
 	img {
-		/* position: absolute; */
 		display: none;
 	}
 
 	canvas {
 		position: absolute;
+	}
+
+	.main-canvas {
 		width: 100%;
 		height: initial;
+	}
+
+	.hand-canvas {
+		bottom: 12px;
+		right: 12px;
+
+		width: 320px;
+		height: 320px;
 	}
 </style>

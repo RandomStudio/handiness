@@ -1,5 +1,3 @@
-
-
 const initCamera = (videoEl) => {
 	const constraints = {
 		video: {
@@ -15,12 +13,6 @@ const initCamera = (videoEl) => {
 	};
 
 	if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
-		// const devices = navigator.mediaDevices.enumerateDevices().then((res) => {
-		// 	console.log(res);
-		// });
-
-		// console.log(devices);
-
 		return navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then(stream => {
