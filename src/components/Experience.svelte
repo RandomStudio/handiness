@@ -28,9 +28,10 @@
 
 			if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
 				activeImages.push(activeImage);
+				
 				if (activeImages.length > 10) {
 					canvasContext.clearRect(0, 0, canvasEl.width, canvasEl.height);
-					activeImages.splice(0, activeImages.length);
+					activeImages.splice(0, activeImages.length - 1);
 				}
 
 				canvasContext.save();
@@ -49,11 +50,11 @@
 				const cornerRightBottom = [lastX.x, lastY.y];
 
 				// Should change depending on resolution :thinking
-				const xDiff = 0.15 / (cornerRightBottom[0] - cornerLeftTop[0]);
-				const yDiff = 0.15 / (cornerRightBottom[1] - cornerLeftTop[1]);
+				const xDiff = 0.25 / (cornerRightBottom[0] - cornerLeftTop[0]);
+				const yDiff = 0.5 / (cornerRightBottom[1] - cornerLeftTop[1]);
 
 				// const scaled = (xDiff > yDiff ? xDiff : yDiff) * 1.25;
-				const scaled = yDiff * 1.5;
+				const scaled = yDiff;
 
 				// Offset in image resolution space
 				const offsetHandToCenterX = (1 - closestHand.center[0] - 0.5) * imageEl.width * scaled;
@@ -68,10 +69,10 @@
 				// Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
 				// Translate takes into account the inverted scale of X
 				canvasContext.translate(canvasEl.width / 2 + scaledMoveX, canvasEl.height / 2 - scaledMoveY);
-				canvasContext.shadowOffsetX = 5;
-				canvasContext.shadowOffsetY = 3;
+				canvasContext.shadowOffsetX = 1;
+				canvasContext.shadowOffsetY = 2;
 				canvasContext.shadowColor = 'white';
-				canvasContext.shadowBlur = 30;
+				canvasContext.shadowBlur = 10;
 
 				canvasContext.scale(-1, 1);
 				canvasContext.drawImage(
@@ -114,8 +115,8 @@
 				drawLandmarks(handCanvasContext, landmarks, {
 					color: isRightHand ? '#00FF00' : '#FF0000',
 					fillColor: isRightHand ? '#FF0000' : '#00FF00',
-					lineWidth: 2,
-					radius: 1
+					// lineWidth: 2,
+					radius: 1,
 				});
 			}
 		}
@@ -167,8 +168,6 @@
 		canvasContext = canvasEl.getContext('2d');
 		handCanvasContext = handCanvasEl.getContext('2d');
 
-		console.info(videoEl, videoEl.width);
-
 		mediaHands.onResults(handleHandsResults);
 
 		render();
@@ -203,7 +202,11 @@
 	<img bind:this={imageEl} src={activeImage} />
 
 	<canvas class="main-canvas" bind:this={canvasEl} />
-	<canvas class="hand-canvas" bind:this={handCanvasEl} />
+
+	<aside>
+		<p>Your hand:</p>
+		<canvas class="hand-canvas" bind:this={handCanvasEl} />
+	</aside>
 </div>
 
 <style>
@@ -217,20 +220,27 @@
 		display: none;
 	}
 
-	canvas {
+	aside {
 		position: absolute;
+		bottom: 16px;
+		right: 16px;
+	}
+	aside p {
+		color: #fff;
 	}
 
 	.main-canvas {
+		position: absolute;
 		width: 100%;
 		height: initial;
 	}
 
 	.hand-canvas {
-		bottom: 12px;
-		right: 12px;
-
 		width: 320px;
-		height: 320px;
+		height: 240px;
+
+		/* width: 1280,
+		height: 720, */
+		background: rgb(168, 168, 168);
 	}
 </style>
