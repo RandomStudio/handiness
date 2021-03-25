@@ -18,17 +18,7 @@ export const cosineDistanceMatching = (vec1, vec2) => {
 	return Math.sqrt(distance);
 }
 
-const calculateAngle = () => {
-    // α = arccos [(b² + c² - a²)/(2bc)]
-    // β = arccos [(a² + c² - b²)/(2ac)]
-    // γ = arccos [(a² + b² - c²)/(2ab)]
-
-	// Point A = Picture Tip
-	// Point B = Webcam Tip
-	// Point C = Edge
-}
-
-
+// Looking for closest 1:1 position and orientation on a 1:1 normalized canvas sizing
 const findMostDistanceSimilar = (vec1, vec2) => {
 	// vec1 is own input [...] - hadn from mp
 	// vec2 is from dataset [...]
@@ -86,12 +76,8 @@ export const findMostSimilarMatch = (userPose) => {
 	let nearestImage = vptree.search(userPose);
 
 	if (nearestImage) {
-		return nearestImage[0].i;
+		return nearestImage[0];
 	}
 
 	return false;
-
-	// console.info(nearestImage[0]) // cosine distance value of the nearest match
-
-	// return index (in relation to poseData) of nearest match.
 }

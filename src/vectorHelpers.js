@@ -33,3 +33,17 @@ export const getVec2DirectionEdge = (vec1, vec2) => {
 
 	return closestDirectionEdge;
 }
+
+
+
+//        _| 
+const calculateAngle = () => {
+    // α = arccos [(b² + c² - a²)/(2bc)]
+    // β = arccos [(a² + c² - b²)/(2ac)]
+    // γ = arccos [(a² + b² - c²)/(2ab)]
+
+	// Point A = Picture Tip
+	// Point B = Webcam Tip
+	// Point C = Edge
+	
+}
