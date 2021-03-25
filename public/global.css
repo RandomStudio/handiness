@@ -1,6 +1,4 @@
-*,
-*::before,
-*::after {
+*, *::before, *::after {
 	box-sizing: border-box;
 }
 
@@ -19,8 +17,14 @@ body {
 	font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
 }
 
+h1, h2, h3, h4, h5, h6, p {
+	margin: 0;
+	padding: 0;
+	line-height: 1.6;
+}
+
 a {
-	color: rgb(0,100,200);
+	color: rgb(0, 100, 200);
 	text-decoration: none;
 }
 
@@ -29,7 +33,7 @@ a:hover {
 }
 
 a:visited {
-	color: rgb(0,80,160);
+	color: rgb(0, 80, 160);
 }
 
 label {
@@ -44,7 +48,7 @@ input, button, select, textarea {
 	margin: 0 0 0.5em 0;
 	box-sizing: border-box;
 	border: 1px solid #ccc;
-	border-radius: 2px;
+	/* border-radius: 2px; */
 }
 
 input:disabled {
@@ -52,9 +56,14 @@ input:disabled {
 }
 
 button {
-	color: #333;
+	color: var(--color-black);
 	background-color: #f4f4f4;
-	outline: none;
+	/* outline: none; */
+	/* border-radius: 0; */
+}
+
+button:hover {
+	cursor: pointer;
 }
 
 button:disabled {
@@ -67,4 +76,28 @@ button:not(:disabled):active {
 
 button:focus {
 	border-color: #666;
+}
+
+:root {
+	/* --color-primary: # */
+	/* --color-accent-1:  */
+	--color-black: #333;
+	--color-gray: #c4c4c4;
+	--color-white: #fff;
+	/* fonts */
+	--font-xsmall: 0.6rem;
+	--font-small: 0.8rem;
+	--font-normal: 1rem;
+	--font-medium: 1.6rem;
+	--font-large: 2.4rem;
+}
+
+h1 {
+	font-size: 1.6rem;
+}
+
+@media all and (min-width: 480px) {
+	h1 {
+		font-size: 2rem;
+	}
 }
