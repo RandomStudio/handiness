@@ -5,6 +5,16 @@
 
 	import { hasDetectedFirstHand, hasIntroTransitionEnded } from '../stores';
 
+	export let handleStartVideo;
+
+	let hasExperienceStarted = false;
+	let shouldHideText = false;
+
+	let moveContainerEl;
+	let moveContainerBbox;
+
+	let promise;
+
 	hasDetectedFirstHand.subscribe((value) => {
 		if (value && !hasExperienceStarted) {
 			moveToCornerProgress.set(1).then(() => {
@@ -16,15 +26,8 @@
 		}
 	});
 
-	export let handleStartVideo;
-
-	let hasExperienceStarted = false;
-
-	let moveContainerEl;
-	let moveContainerBbox;
-
 	const startVideo = () => {
-		handleStartVideo();
+		promise = handleStartVideo();
 
 		slideProgress.set(1).then(() => {
 			const bbox = moveContainerEl.getBoundingClientRect();
@@ -36,16 +39,10 @@
 			const yDiff = innerHeight - bottom - 16;
 
 			moveContainerBbox = { left: xDiff, top: yDiff, xOffset: width / 2 };
-			console.log(moveContainerBbox);
-		});
-	};
 
-	const handleOutTransitionEnd = () => {
-		// Likely add timeout of a few ms
-		setTimeout(() => {
-			hasIntroTransitionEnded.set(true);
-			hasExperienceStarted = true;
-		}, 300);
+			shouldHideText = true;
+
+		});
 	};
 
 	const slideProgress = tweened(0, {
@@ -70,9 +67,7 @@
 
 		<div
 			class="preview-container"
-			style={`
-					--slideProgress: ${$slideProgress}
-				`}
+			style={`--slideProgress: ${$slideProgress}`}
 		>
 			<div />
 			<div
@@ -87,19 +82,35 @@
 			/>
 		</div>
 
-		<div class="preview-bar">
-			<span />
-			<p>Similarity: 97%</p>
-		</div>
 
-		<p class="description">
-			Image searching based on your HAND!
-			<br />
-			We'll need camera access for this though
-		</p>
+		{#if !shouldHideText}
+			<div transition:fade class="preview-bar">
+				<span />
+				<p>Similarity: 97%</p>
+			</div>
 
-		<button on:click={startVideo}>Let's do this!</button>
-		<!-- <div>Loader - show if all approved but still loading</div> -->
+			<p transition:fade class="description">
+				Image searching based on your HAND!
+				<br />
+				We'll need camera access for this though
+			</p>
+
+			<button transition:fade on:click={startVideo}>Let's do this!</button>
+
+		{:else}
+			<div transition:fade={{ delay: 600 }}>
+				{#await promise}
+					<p>Loading</p>
+				{:then result}
+					<p>
+						Let's do this! <br/>
+						HANDS UP 🙌🏻
+					</p>
+				{:catch error}
+					<p>ERROR</p>
+				{/await}
+			</div>
+		{/if}
 
 		<footer>
 			<p>
@@ -166,7 +177,6 @@
 			max-width: 50%;
 			width: 100%;
 			justify-content: center;
-			// flex: 1;
 			padding-bottom: 50%;
 			background-position: center;
 
@@ -179,10 +189,6 @@
 				background-image: url('/Tracking preview.png');
 				transform: translateX(calc(var(--slideProgress) * -50%));
 			}
-		}
-
-		&.transition-hand-container {
-			position: absolute;
 		}
 	}
 

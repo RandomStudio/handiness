@@ -16,11 +16,8 @@
 	let mediaHands;
 	let dataset;
 
-	let hasClickedOnAbout = false;
+	let isAboutOpen = false;
 	let hasExperienceStarted = false;
-	// let hasDetectedFirstHand = false;
-
-	let isExperienceReady = false;
 
 	const startVideo = async () => {
 		// const data = await fetch('/output.json');
@@ -37,8 +34,6 @@
 		await initCamera(videoEl);
 		videoEl.play();
 		mediaHands = initMediaHands();
-
-		// hasExperienceStarted = true;
 	};
 
 	onMount(async () => {
@@ -55,10 +50,14 @@
 </script>
 
 <main>
-	{#if !hasClickedOnAbout}
-		<aside on:click={() => (hasClickedOnAbout = !hasClickedOnAbout)} class="about">ABOUT</aside>
+	{#if !isAboutOpen}
+		<aside on:click={() => (isAboutOpen = !isAboutOpen)} class="about">ABOUT</aside>
 	{:else}
-		<aside on:click={() => (hasClickedOnAbout = !hasClickedOnAbout)} class="about">X</aside>
+		<aside on:click={() => (isAboutOpen = !isAboutOpen)} class="about">X</aside>
+	{/if}
+
+	{#if isAboutOpen}
+		<About />
 	{/if}
 
 	{#if mediaHands}
@@ -67,11 +66,6 @@
 
 	{#if !mediaHands || !hasExperienceStarted}
 		<Intro handleStartVideo={startVideo} />
-		<!-- {:else if hasExperienceStarted}
-		<Experience videoEl={videoEl} mediaHands={mediaHands} DATASET={dataset} /> -->
-	{/if}
-	{#if hasClickedOnAbout}
-		<About />
 	{/if}
 </main>
 
@@ -81,9 +75,8 @@
 		width: 100%;
 		height: 100%;
 		margin: 0;
-		/* background: #000; */
 		background: #bbf2b5;
-		/* background: rgb(163, 163, 163); */
+
 	}
 	.about {
 		cursor: pointer;
