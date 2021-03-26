@@ -25,6 +25,7 @@
 
 	let similarityRate = '-';
 	let currentHandLabel = 'None';
+	
 	let showAnnotatedImages = false;
 	let showAnnotatedToggler = false;
 	let showImageBlending = false;
@@ -67,7 +68,9 @@
 		const normalSimilarMatch = findMostSimilarMatch(landmarksVecFloatArr);
 		const mirrorXSimilarMatch = findMostSimilarMatch(mirroredLandmarks);
 
-		const closestMatch = normalSimilarMatch?.d < mirrorXSimilarMatch?.d ? normalSimilarMatch : mirrorXSimilarMatch;
+		const isMirrorResult = normalSimilarMatch?.d < mirrorXSimilarMatch?.d;
+
+		const closestMatch = isMirrorResult ? normalSimilarMatch : mirrorXSimilarMatch;
 		const closestIndex = closestMatch.i;
 
 		if (closestIndex) {
@@ -105,7 +108,7 @@
 
 				// Should change depending on resolution :thinking
 				const xDiff = 0.25 / (cornerRightBottom[0] - cornerLeftTop[0]);
-				const yDiff = 0.5 / (cornerRightBottom[1] - cornerLeftTop[1]);
+				const yDiff = 0.4 / (cornerRightBottom[1] - cornerLeftTop[1]);
 
 				// const scaled = (xDiff > yDiff ? xDiff : yDiff) * 1.25;
 				const scaled = yDiff;
@@ -126,9 +129,13 @@
 				// On Flipping: + for x flipped || - if non flipped image
 				// Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
 				// Translate takes into account the inverted scale of X
-				canvasContext.translate(canvasEl.width / 2 + scaledMoveX, canvasEl.height / 2 - scaledMoveY);
+				if (isMirrorResult) {
+					canvasContext.translate(canvasEl.width / 2 + scaledMoveX, canvasEl.height / 2 - scaledMoveY);
+					canvasContext.scale(-1, 1);
+				} else {
+					canvasContext.translate(canvasEl.width / 2 - scaledMoveX, canvasEl.height / 2 - scaledMoveY);
+				}
 
-				canvasContext.scale(-1, 1);
 
 				// canvasContext.globalCompositeOperation = 'multiply'; // NOPE
 				// canvasContext.globalCompositeOperation = 'screen'; // NOT REALLY
@@ -176,13 +183,13 @@
 
 				drawConnectors(canvasContext, landmarks, HAND_CONNECTIONS, {
 					color: isRightHand ? '#00FF00' : '#FF0000',
-					lineWidth: 2,
+					lineWidth: 5,
 				});
 
 				drawLandmarks(canvasContext, landmarks, {
 					color: isRightHand ? '#00FF00' : '#FF0000',
 					fillColor: isRightHand ? '#FF0000' : '#00FF00',
-					// lineWidth: 2,
+					lineWidth: 5,
 					radius: 1,
 				});
 			}
@@ -230,6 +237,7 @@
 		// setTimeout(render, 1000 / 30);
 		// setTimeout(render, 1000 / 24);
 		// setTimeout(render, 1000 / 20);
+		// setTimeout(render, 1000 / 16);
 		setTimeout(render, 1000 / 12);
 	};
 
@@ -283,8 +291,12 @@
 				Blend Images
 			</span>
 			<p>Detected Hand: {currentHandLabel}</p>
-			<!-- <p>Similarity: {similarityRate}%</p> -->
-			<div style={`--similarityRate: ${similarityRate / 100}`}>Similiarity: {similarityRate}%</div>
+
+			<div transition:fade class="similarity-container" style={`--similarityRate: ${similarityRate / 100}`}>
+				<span />
+				<p>Similiarity: {similarityRate}%</p>
+			</div>
+
 		</aside>
 	{/if}
 </div>
@@ -307,15 +319,35 @@
 	.hand-info-container {
 		bottom: 16px;
 		left: 16px;
-		background: #fff;
+		backdrop-filter: blur(32px);
+		color: white;
 
-		div {
-			height: 100%;
+		.similarity-container {
+			position: relative;
+			min-width: 8rem;
 			width: 100%;
-			background: red;
-			transform-origin: left;
-			// transform: scaleX(.5);
-			transform: scaleX(var(--similarityRate));
+			max-width: 14rem;
+			height: 24px;
+			margin-bottom: 1.6rem;
+			background: var(--color-gray);
+			color: var(--color-white);
+			box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+
+			span {
+				display: block;
+				width: 100%;
+				height: 100%;
+				background: var(--color-black);
+				transform: scaleX(var(--similarityRate));
+				transform-origin: left;
+			}
+
+			p {
+				font-size: var(--font-small);
+				position: absolute;
+				top: 0;
+				left: 0.4em;
+			}
 		}
 
 		.toggler {
@@ -325,7 +357,7 @@
 			height: 22px;
 			width: 46px;
 			display: inline-block;
-			background-color: grey;
+			background-color: black;
 			margin: 2px;
 			vertical-align: sub;
 			border-radius: 30px;
@@ -353,10 +385,6 @@
 	.hand-canvas-container {
 		bottom: 16px;
 		right: 16px;
-
-		p {
-			color: #fff;
-		}
 	}
 
 	.main-canvas {
@@ -368,9 +396,5 @@
 	.hand-canvas {
 		width: 240px;
 		height: 160px;
-
-		/* width: 1280,
-		height: 720, */
-		/* background: rgb(168, 168, 168); */
 	}
 </style>
