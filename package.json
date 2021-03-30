@@ -27,7 +27,9 @@
     "@anselan/maprange": "^0.6.2",
     "@mediapipe/drawing_utils": "^0.2.1614797616",
     "@mediapipe/hands": "^0.1.1614621970",
+    "animejs": "^3.2.1",
     "compute-cosine-similarity": "^1.0.0",
+    "pixi.js": "^6.0.1",
     "sirv-cli": "^1.0.11",
     "stats.js": "^0.17.0",
     "vptree": "^1.0.0"

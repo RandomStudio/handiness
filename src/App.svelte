@@ -1,8 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
 
-	// import {}
-
 	import initMediaHands from './tracking/initMediaHands';
 	import initCamera from './tracking/initCamera';
 
@@ -10,6 +8,7 @@
 
 	import Intro from './components/Intro.svelte';
 	import Experience from './components/Experience.svelte';
+	import ExperiencePixi from './components/ExperiencePixi.svelte';
 	import About from './components/About.svelte';
 
 	let videoEl = document.createElement('video');
@@ -50,6 +49,7 @@
 </script>
 
 <main>
+	
 	{#if !isAboutOpen}
 		<aside on:click={() => (isAboutOpen = !isAboutOpen)} class="about">ABOUT</aside>
 	{:else}
@@ -61,7 +61,9 @@
 	{/if}
 
 	{#if mediaHands}
-		<Experience {videoEl} {mediaHands} DATASET={dataset} />
+		<ExperiencePixi {videoEl} {mediaHands} DATASET={dataset} />
+
+		<!-- <Experience {videoEl} {mediaHands} DATASET={dataset} /> -->
 	{/if}
 
 	{#if !mediaHands || !hasExperienceStarted}
