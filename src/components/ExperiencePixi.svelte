@@ -109,14 +109,23 @@
 				// On Flipping: + for x flipped || - if non flipped image
 				// Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
 				// Translate takes into account the inverted scale of X
-				// newImageSprite.scale.set(-newImageSprite.scale.x, newImageSprite.scale.y);
 
 				function onTextureUpdate() {
 					// Offset in image resolution space
-					const offsetHandToCenterX = (1 - closestHand.center[0] - 0.5) * newImageSprite.width;
+					let offsetHandToCenterX = (closestHand.center[0] - 0.5) * newImageSprite.width;
+					// let offsetHandToCenterX = (1 - 0.3231824664842515 - 0.5) * newImageSprite.width;
 					const offsetHandToCenterY = (closestHand.center[1] - 0.5) * newImageSprite.height;
 
-					newImageSprite.x = PixiApp.screen.width / 2 - offsetHandToCenterX;
+					if (isMirrorResult) {
+						// offsetHandToCenterX = (closestHand.center[0] - 0.5) * newImageSprite.width;
+						// 	newImageSprite.x = PixiApp.screen.width / 2 + offsetHandToCenterX;
+						// newImageSprite.x = PixiApp.screen.width / 2 - offsetHandToCenterX;
+						// newImageSprite.scale.set(-newImageSprite.scale.x, newImageSprite.scale.y);
+					} else {
+						// newImageSprite.x = PixiApp.screen.width / 2 + offsetHandToCenterX;
+					}
+
+					newImageSprite.x = PixiApp.screen.width / 2 + offsetHandToCenterX;
 					newImageSprite.y = PixiApp.screen.height / 2 - offsetHandToCenterY;
 
 					// Load object into GPU
