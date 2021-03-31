@@ -19,13 +19,7 @@
 	let hasExperienceStarted = false;
 
 	const startVideo = async () => {
-		// const data = await fetch('/output.json');
-		// const data = await fetch('/output-train.json');
-		const data = await fetch('/output-coco-final.json');
-		// const data = await fetch('/output-train-mpii.json');
-		// const data = await fetch('/output_full.json');
-		// const data = await fetch('/output_index.json');
-		// const data = await fetch('/output_tip.json');
+		const data = await fetch('/output.json');
 		dataset = await data.json();
 
 		buildVPTree(dataset.map((data) => data.landmarks));
@@ -34,22 +28,9 @@
 		videoEl.play();
 		mediaHands = initMediaHands();
 	};
-
-	onMount(async () => {
-		// // const data = await fetch('/output.json');
-		// // const data = await fetch('/output-train.json');
-		// const data = await fetch('/output-coco-final.json');
-		// // const data = await fetch('/output-train-mpii.json');
-		// // const data = await fetch('/output_full.json');
-		// // const data = await fetch('/output_index.json');
-		// // const data = await fetch('/output_tip.json');
-		// dataset = await data.json();
-		// buildVPTree(dataset.map((data) => data.landmarks));
-	});
 </script>
 
 <main>
-	
 	{#if !isAboutOpen}
 		<aside on:click={() => (isAboutOpen = !isAboutOpen)} class="about">ABOUT</aside>
 	{:else}
@@ -78,7 +59,6 @@
 		height: 100%;
 		margin: 0;
 		background: #bbf2b5;
-
 	}
 	.about {
 		cursor: pointer;

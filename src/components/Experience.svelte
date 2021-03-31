@@ -21,7 +21,7 @@
 
 	let similarityRate = '-';
 	let currentHandLabel = 'None';
-	
+
 	let showAnnotatedImages = false;
 	let showAnnotatedToggler = false;
 	let showImageBlending = false;
@@ -72,10 +72,10 @@
 		if (closestIndex) {
 			const closestHand = DATASET[closestIndex];
 
-			// activeImage = showAnnotatedImages
-			// 	? `/images-coco-final-ann/${closestHand.file}`
-			// 	: `/images-coco-final/${closestHand.file}`;
-			activeImage = `/images-coco-final-compressed/${closestHand.file}`;
+			activeImage = showAnnotatedImages
+				? `/images-coco-final-ann/${closestHand.file}`
+				: `/images-coco-final/${closestHand.file}`;
+			// activeImage = `/images-coco-final-compressed/${closestHand.file}`;
 
 			if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
 				similarityRate = (1 - closestMatch.d).toFixed(2) * 100;
@@ -132,7 +132,6 @@
 				} else {
 					canvasContext.translate(canvasEl.width / 2 - scaledMoveX, canvasEl.height / 2 - scaledMoveY);
 				}
-
 
 				// canvasContext.globalCompositeOperation = 'multiply'; // NOPE
 				// canvasContext.globalCompositeOperation = 'screen'; // NOT REALLY
@@ -293,7 +292,6 @@
 				<span />
 				<p>Similiarity: {similarityRate}%</p>
 			</div>
-
 		</aside>
 	{/if}
 </div>

@@ -25,7 +25,8 @@
 	let activeImages = [];
 	let imageContainer;
 	let prevActiveImage;
-	let IMAGES_LIMIT = 10;
+	let IMAGES_LIMIT = 4;
+	let isAnimating = false;
 
 	// let similarityRate = '-';
 	// let currentHandLabel = 'None';
@@ -34,6 +35,25 @@
 	// let showAnnotatedToggler = false;
 	// let showImageBlending = false;
 	// let showImageBlendedToggler = false;
+	let displacementFilter;
+
+	const addFilterLayer = () => {
+		// //add filters
+		let displacementSprite = PIXI.Sprite.from('/displacementMap.jpg');
+		displacementSprite.width = PixiApp.renderer.width * 1.5;
+		displacementSprite.height = PixiApp.renderer.height * 1.5;
+		displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
+		displacementFilter.scale.set(0.1);
+		// displacementFilter.scale.set(4.1);
+		displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+
+		// imageContainer.addChild(displacementSprite);
+		PixiApp.stage.addChild(displacementSprite);
+		// container.filters = [displacementFilter];
+		//  ???
+		imageContainer.filters = [displacementFilter];
+		// PixiApp.stage.addChild(container);
+	};
 
 	const drawImages = (landmarks) => {
 		// Float 42
@@ -70,9 +90,11 @@
 			// activeImage = showAnnotatedImages
 			// 	? `/images-coco-final-ann/${closestHand.file}`
 			// 	: `/images-coco-final/${closestHand.file}`;
-			activeImage = `/images-coco-final-compressed/${closestHand.file}`;
+			// activeImage = `/images/${closestHand.file}`;
+			activeImage = `/images_compressed/${closestHand.file}`;
 
-			if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
+			// if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
+			if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage && !isAnimating) {
 				prevActiveImage = activeImage;
 
 				// similarityRate = (1 - closestMatch.d).toFixed(2) * 100;
@@ -96,7 +118,10 @@
 
 				const scaled = yDiff;
 
+				const oldTexture = PIXI.Texture.from(prevActiveImage);
 				const newTexture = PIXI.Texture.from(activeImage);
+
+				const oldImageSprite = new PIXI.Sprite(oldTexture);
 				const newImageSprite = new PIXI.Sprite(newTexture);
 				// Scaling does not affect coordinate system
 				// Continue by assuming moving with the original sizing and not after scale dimensions
@@ -134,7 +159,70 @@
 							imageContainer.removeChildren(0, 1);
 						}
 
-						const newImageChild = imageContainer.addChild(newImageSprite);
+						// Put in if first
+						// Afterwards follow logic
+
+						if (!isAnimating) {
+							const currentImageChild = imageContainer.children[imageContainer.children.length - 1];
+							const newImageChild = imageContainer.addChild(newImageSprite);
+
+							isAnimating = true;
+							// if (imageContainer.children.length >= IMAGES_LIMIT) {
+							// imageContainer.children[2].alpha = 0.5;
+							newImageSprite.alpha = 0;
+
+							const animDuration = 1600;
+
+							const transitionTimeline = anime.timeline({
+								easing: 'easeOutExpo',
+								duration: animDuration,
+							});
+							//it doesnt like the random , doesnt show up on my side ooooh yyyeeeeee
+
+							// i forgot the Math jsut on the .max maybe now ?
+							transitionTimeline.add(
+								{
+									targets: displacementFilter.scale,
+									y: Math.floor(Math.max(300, Math.random() * 600)),
+									x: 0.1,
+								},
+								0,
+							);
+
+							transitionTimeline.add(
+								{
+									targets: currentImageChild,
+									alpha: 0.5,
+								},
+								animDuration * 0.5,
+							);
+
+							transitionTimeline.add(
+								{
+									targets: displacementFilter.scale,
+									y: 0.1,
+									x: 0.1,
+								},
+								animDuration * 0.75,
+							);
+							
+							// we can also mathematically make the timings dynamic 
+							// think this joke doesnt go through as magically and mathematically are words themselvers
+							// partly the problem is also that the iamges are not on top of each other
+							// makes the transitiona  bit wacky as parts just 'appear' instead of morph
+								// need to play around a bit more to figure it out 
+							transitionTimeline.add(
+								{
+									targets: newImageSprite,
+									alpha: 1,
+								},
+								animDuration * 0.75,
+							);
+
+							transitionTimeline.finished.then(() => {
+								isAnimating = false;
+							});
+						}
 					});
 				}
 
@@ -275,6 +363,7 @@
 
 	onMount(() => {
 		initCanvas();
+		addFilterLayer();
 
 		canvasContext = canvasEl.getContext('2d');
 		handCanvasContext = handCanvasEl.getContext('2d');
@@ -283,21 +372,38 @@
 
 		render();
 
-		// let img1 = PIXI.Sprite.from('/images-coco-final/10.jpg');
+		// let img1 = PIXI.Sprite.from('/images_compressed/10.jpg');
 		// img1.height = 800;
 		// img1.width = 600;
 		// img1.position.x = 75;
 		// img1.position.y = 50;
-		// container.addChild(img1);
+		// imageContainer.addChild(img1);
 
-		// let img2 = PIXI.Sprite.from('/images-coco-final/12.jpg');
+		// let img2 = PIXI.Sprite.from('/images_compressed/12.jpg');
 		// img2.height = 800;
 		// img2.width = 600;
 		// img2.position.x = 125;
 		// img2.position.y = 50;
 		// img2.alpha = 0;
-		// container.addChild(img2);
-		// console.log('img2:', img2)
+		// imageContainer.addChild(img2);
+		// console.log('img2:', img2);
+
+		// tl = anime.timeline({
+		// 	easing: 'easeOutExpo',
+		// 	duration: 1750,
+		// });
+
+		// tl.add({
+		// 	targets: displacementFilter.scale,
+		// 	y: 0.1,
+		// 	x: 0.1,
+		// });
+
+		// tl.add({
+		// 	targets: displacementFilter.scale,
+		// 	y: 600,
+		// 	x: 0.1,
+		// });
 
 		// //add filters
 		// let displacementSprite = PIXI.Sprite.from('/displacementMap.jpg');
