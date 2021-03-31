@@ -35,7 +35,7 @@
 	// let showAnnotatedToggler = false;
 	// let showImageBlending = false;
 	// let showImageBlendedToggler = false;
-	let displacementMaps = ['/maps/perlin1.png', '/maps/map.jpeg', '/maps/noise.png', '/maps/displacementMap.jpg'];
+	let displacementMaps = ['/maps/dPerlin.jpg', '/maps/dMap.jpg', '/maps/dNoise.jpg', '/maps/dMap2.jpg'];
 	let displacementSprites = [];
 	let displacementFilters = [];
 
