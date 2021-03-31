@@ -25,7 +25,7 @@
 	let activeImages = [];
 	let imageContainer;
 	let prevActiveImage;
-	let IMAGES_LIMIT = 4;
+	let IMAGES_LIMIT = 7;
 	let isAnimating = false;
 
 	// let similarityRate = '-';
@@ -35,24 +35,28 @@
 	// let showAnnotatedToggler = false;
 	// let showImageBlending = false;
 	// let showImageBlendedToggler = false;
-	let displacementFilter;
+	let displacementMaps = ['/maps/perlin1.png', '/maps/map.jpeg', '/maps/noise.png', '/maps/displacementMap.jpg'];
+	let displacementSprites = [];
+	let displacementFilters = [];
 
 	const addFilterLayer = () => {
-		// //add filters
-		let displacementSprite = PIXI.Sprite.from('/displacementMap.jpg');
-		displacementSprite.width = PixiApp.renderer.width * 1.5;
-		displacementSprite.height = PixiApp.renderer.height * 1.5;
-		displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
-		displacementFilter.scale.set(0.1);
-		// displacementFilter.scale.set(4.1);
-		displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+		displacementMaps.forEach((map) => {
+			let dSprite = PIXI.Sprite.from(map);
+			dSprite.width = PixiApp.renderer.width * 1.5;
+			dSprite.height = PixiApp.renderer.height * 1.5;
+			dSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+			dSprite.anchor.set(0.5);
 
-		// imageContainer.addChild(displacementSprite);
-		PixiApp.stage.addChild(displacementSprite);
-		// container.filters = [displacementFilter];
-		//  ???
-		imageContainer.filters = [displacementFilter];
-		// PixiApp.stage.addChild(container);
+			PixiApp.stage.addChild(dSprite);
+
+			let dFilter = new PIXI.filters.DisplacementFilter(dSprite);
+			dFilter.scale.set(0.1);
+
+			displacementSprites.push(dSprite);
+			displacementFilters.push(dFilter);
+		});
+
+		imageContainer.filters = displacementFilters;
 	};
 
 	const drawImages = (landmarks) => {
@@ -118,11 +122,10 @@
 
 				const scaled = yDiff;
 
-				const oldTexture = PIXI.Texture.from(prevActiveImage);
 				const newTexture = PIXI.Texture.from(activeImage);
 
-				const oldImageSprite = new PIXI.Sprite(oldTexture);
 				const newImageSprite = new PIXI.Sprite(newTexture);
+
 				// Scaling does not affect coordinate system
 				// Continue by assuming moving with the original sizing and not after scale dimensions
 				newImageSprite.scale.set(scaled, scaled);
@@ -134,11 +137,9 @@
 				// On Flipping: + for x flipped || - if non flipped image
 				// Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
 				// Translate takes into account the inverted scale of X
-
 				function onTextureUpdate() {
 					// Offset in image resolution space
 					let offsetHandToCenterX = (closestHand.center[0] - 0.5) * newImageSprite.width;
-					// let offsetHandToCenterX = (1 - 0.3231824664842515 - 0.5) * newImageSprite.width;
 					const offsetHandToCenterY = (closestHand.center[1] - 0.5) * newImageSprite.height;
 
 					if (isMirrorResult) {
@@ -159,32 +160,31 @@
 							imageContainer.removeChildren(0, 1);
 						}
 
-						// Put in if first
-						// Afterwards follow logic
-
 						if (!isAnimating) {
+							const randomFilter =
+								displacementFilters[
+									Math.floor(Math.random() * displacementFilters.length) % displacementFilters.length
+								];
+
 							const currentImageChild = imageContainer.children[imageContainer.children.length - 1];
 							const newImageChild = imageContainer.addChild(newImageSprite);
 
 							isAnimating = true;
-							// if (imageContainer.children.length >= IMAGES_LIMIT) {
-							// imageContainer.children[2].alpha = 0.5;
+
 							newImageSprite.alpha = 0;
 
-							const animDuration = 1600;
+							const animDuration = 1200;
 
 							const transitionTimeline = anime.timeline({
 								easing: 'easeOutExpo',
 								duration: animDuration,
 							});
-							//it doesnt like the random , doesnt show up on my side ooooh yyyeeeeee
 
-							// i forgot the Math jsut on the .max maybe now ?
 							transitionTimeline.add(
 								{
-									targets: displacementFilter.scale,
-									y: Math.floor(Math.max(300, Math.random() * 600)),
-									x: 0.1,
+									targets: randomFilter.scale,
+									x: Math.floor(Math.max(100, Math.random() * 1200)),
+									y: Math.floor(Math.max(100, Math.random() * 1200)),
 								},
 								0,
 							);
@@ -192,25 +192,20 @@
 							transitionTimeline.add(
 								{
 									targets: currentImageChild,
-									alpha: 0.5,
+									alpha: 0.75,
 								},
 								animDuration * 0.5,
 							);
 
 							transitionTimeline.add(
 								{
-									targets: displacementFilter.scale,
+									targets: randomFilter.scale,
 									y: 0.1,
 									x: 0.1,
 								},
 								animDuration * 0.75,
 							);
-							
-							// we can also mathematically make the timings dynamic 
-							// think this joke doesnt go through as magically and mathematically are words themselvers
-							// partly the problem is also that the iamges are not on top of each other
-							// makes the transitiona  bit wacky as parts just 'appear' instead of morph
-								// need to play around a bit more to figure it out 
+
 							transitionTimeline.add(
 								{
 									targets: newImageSprite,
