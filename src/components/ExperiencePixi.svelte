@@ -25,7 +25,7 @@
 	let activeImages = [];
 	let imageContainer;
 	let prevActiveImage;
-	let IMAGES_LIMIT = 7;
+	let IMAGES_LIMIT = 10;
 	let isAnimating = false;
 
 	// let similarityRate = '-';
@@ -38,6 +38,86 @@
 	let displacementMaps = ['/maps/dPerlin.jpg', '/maps/dMap.jpg', '/maps/dNoise.jpg', '/maps/dMap2.jpg'];
 	let displacementSprites = [];
 	let displacementFilters = [];
+
+	const vulgarityDetection = (landmarks) => {
+		// state: -1 = unknown, 0 = close, 1 = open
+		
+		// Naive implementation using the wrist as reference
+		// To infer whether the hand is pointing up or downwards
+		const wrist = landmarks[0];
+		const handIsPointingUp = wrist.y > landmarks[6].y; // Can be any connecting joint on the hand 
+		const r = {};
+
+		if (handIsPointingUp) {
+			if (landmarks[6].y > landmarks[7].y && landmarks[7].y > landmarks[8].y) {
+				r.index_state = 1;
+			} else if (landmarks[6].y < landmarks[8].y) {
+				r.index_state = 0;
+			} else {
+				r.index_state = -1;
+			}
+			
+			if (landmarks[10].y > landmarks[11].y && landmarks[11].y > landmarks[12].y) {
+				r.middle_state = 1;
+			} else if (landmarks[10].y < landmarks[12].y) {
+				r.middle_state = 0;
+			} else {
+				r.middle_state = -1;
+			}
+			
+			if (landmarks[14].y > landmarks[15].y && landmarks[15].y > landmarks[16].y) {
+				r.ring_state = 1;
+			} else if (landmarks[14].y < landmarks[16].y) {
+				r.ring_state = 0;
+			} else {
+				r.ring_state = -1;
+			}
+			
+			if (landmarks[18].y > landmarks[19].y && landmarks[19].y > landmarks[20].y) {
+				r.pinky_state = 1;
+			} else if (landmarks[18].y < landmarks[20].y) {
+				r.pinky_state = 0;
+			} else {
+				r.pinky_state = -1;
+			}
+		} else {
+			if (landmarks[6].y < landmarks[7].y && landmarks[7].y < landmarks[8].y) {
+				r.index_state = 1;
+			} else if (landmarks[6].y > landmarks[8].y) {
+				r.index_state = 0;
+			} else {
+				r.index_state = -1;
+			}
+			
+			if (landmarks[10].y < landmarks[11].y && landmarks[11].y < landmarks[12].y) {
+				r.middle_state = 1;
+			} else if (landmarks[10].y > landmarks[12].y) {
+				r.middle_state = 0;
+			} else {
+				r.middle_state = -1;
+			}
+			
+			if (landmarks[14].y < landmarks[15].y && landmarks[15].y < landmarks[16].y) {
+				r.ring_state = 1;
+			} else if (landmarks[14].y > landmarks[16].y) {
+				r.ring_state = 0;
+			} else {
+				r.ring_state = -1;
+			}
+			
+			if (landmarks[18].y < landmarks[19].y && landmarks[19].y < landmarks[20].y) {
+				r.pinky_state = 1;
+			} else if (landmarks[18].y > landmarks[20].y) {
+				r.pinky_state = 0;
+			} else {
+				r.pinky_state = -1;
+			}
+		}
+
+		if (r.index_state === 0 && r.middle_state === 1 && r.ring_state === 0 && r.pinky_state === 0) {
+			alert("HEY! WATCH IT!");
+		}
+	};
 
 	const addFilterLayer = () => {
 		displacementMaps.forEach((map) => {
@@ -64,7 +144,6 @@
 		const landmarksVecFloatArr = landmarks.reduce((accum, current) => [...accum, current.x, current.y], []);
 
 		// Doesn't matter where the origin is when looking for cosine similarities
-		//
 		const wristAsOrigin = landmarks[0];
 
 		const mirroredLandmarks = landmarks
@@ -88,6 +167,8 @@
 		const closestMatch = isMirrorResult ? normalSimilarMatch : mirrorXSimilarMatch;
 		const closestIndex = closestMatch.i;
 
+		vulgarityDetection(landmarks);
+
 		if (closestIndex) {
 			const closestHand = DATASET[closestIndex];
 
@@ -103,11 +184,6 @@
 
 				// similarityRate = (1 - closestMatch.d).toFixed(2) * 100;
 
-				// Check image orientation
-				// Scale image relatively in aspect ratio to take the full height or width of the screen at the very least
-				// const isPortrait = canvasEl.height > canvasEl.width;
-				// const scaled = isPortrait ? canvasEl.height / imageEl.height : canvasEl.width / imageEl.width;
-
 				// Calculate the required scaling to normalize the hand bbox/size of all images
 				const landmarkCopies = [...landmarks];
 				const { [0]: firstX, [landmarkCopies.length - 1]: lastX } = landmarkCopies.sort((a, b) => a.x - b.x);
@@ -116,7 +192,7 @@
 				const cornerLeftTop = [firstX.x, firstY.y];
 				const cornerRightBottom = [lastX.x, lastY.y];
 
-				// // Should change depending on resolution :thinking
+				// Should change depending on resolution
 				const xDiff = 0.25 / (cornerRightBottom[0] - cornerLeftTop[0]);
 				const yDiff = 0.5 / (cornerRightBottom[1] - cornerLeftTop[1]);
 
@@ -134,24 +210,18 @@
 				// Listener emitted when texture has fully loaded including metadata
 				newTexture.on('update', onTextureUpdate);
 
-				// On Flipping: + for x flipped || - if non flipped image
-				// Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
-				// Translate takes into account the inverted scale of X
 				function onTextureUpdate() {
 					// Offset in image resolution space
 					let offsetHandToCenterX = (closestHand.center[0] - 0.5) * newImageSprite.width;
 					const offsetHandToCenterY = (closestHand.center[1] - 0.5) * newImageSprite.height;
 
 					if (isMirrorResult) {
-						// offsetHandToCenterX = (closestHand.center[0] - 0.5) * newImageSprite.width;
-						// 	newImageSprite.x = PixiApp.screen.width / 2 + offsetHandToCenterX;
-						// newImageSprite.x = PixiApp.screen.width / 2 - offsetHandToCenterX;
-						// newImageSprite.scale.set(-newImageSprite.scale.x, newImageSprite.scale.y);
+						newImageSprite.scale.set(-scaled, scaled);
+						newImageSprite.x = PixiApp.screen.width / 2 + -offsetHandToCenterX;
 					} else {
-						// newImageSprite.x = PixiApp.screen.width / 2 + offsetHandToCenterX;
+						newImageSprite.x = PixiApp.screen.width / 2 + offsetHandToCenterX;
 					}
 
-					newImageSprite.x = PixiApp.screen.width / 2 + offsetHandToCenterX;
 					newImageSprite.y = PixiApp.screen.height / 2 - offsetHandToCenterY;
 
 					// Load object into GPU
@@ -161,6 +231,10 @@
 						}
 
 						if (!isAnimating) {
+							isAnimating = true;
+
+							imageContainer.children.forEach((image) => (image.alpha -= 0.1));
+
 							const randomFilter =
 								displacementFilters[
 									Math.floor(Math.random() * displacementFilters.length) % displacementFilters.length
@@ -169,11 +243,9 @@
 							const currentImageChild = imageContainer.children[imageContainer.children.length - 1];
 							const newImageChild = imageContainer.addChild(newImageSprite);
 
-							isAnimating = true;
-
 							newImageSprite.alpha = 0;
 
-							const animDuration = 1200;
+							const animDuration = 500;
 
 							const transitionTimeline = anime.timeline({
 								easing: 'easeOutExpo',
@@ -276,7 +348,6 @@
 				});
 
 				drawLandmarks(canvasContext, landmarks, {
-					color: isRightHand ? '#00FF00' : '#FF0000',
 					fillColor: isRightHand ? '#FF0000' : '#00FF00',
 					lineWidth: 5,
 					radius: 1,
@@ -324,30 +395,16 @@
 	};
 
 	const initCanvas = () => {
-		// let type = 'WebGL';
-
-		// if (!PIXI.utils.isWebGLSupported()) {
-		// 	type = 'canvas';
-		// }
-
 		PixiApp = new PIXI.Application({
 			view: canvasEl,
-			width: 800, // default: 800
-			height: 600, // default: 600
 			antialias: true, // default: false
 			backgroundColor: 0xbbf2b5,
 			// resolution: window.devicePixelRatio || 1,
-			// backgroundColor: 0x090f15,
 			resizeTo: window,
 		});
 
 		imageContainer = new PIXI.Container();
 		PixiApp.stage.addChild(imageContainer);
-
-		// PixiApp.renderer.view.style.position = 'absolute';
-		// PixiApp.renderer.view.style.display = 'block';
-		// PixiApp.renderer.autoResize = true;
-		// PixiApp.renderer.resize(window.innerWidth, window.innerHeight);
 
 		let draw = () => {
 			PixiApp.renderer.render(PixiApp.stage);
