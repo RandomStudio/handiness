@@ -6,8 +6,9 @@
 
 	import * as PIXI from 'pixi.js';
 
-	import { findMostSimilarMatch } from '../utils';
+	import { findMostSimilarMatch } from '../utils/vptree';
 	import { hasDetectedFirstHand, hasIntroTransitionEnded } from '../stores';
+	import { drawCustomHands, vulgarityDetection } from '../utils/handUtils.js';
 
 	export let videoEl;
 	export let mediaHands;
@@ -21,11 +22,13 @@
 	let handCanvasEl;
 	let handCanvasContext;
 
+	let imageContainer;
+	let handContainer;
+	let mpHand;
+	let IMAGES_LIMIT = 10;
 	let activeImage = '';
 	let activeImages = [];
-	let imageContainer;
 	let prevActiveImage;
-	let IMAGES_LIMIT = 10;
 	let isAnimating = false;
 
 	// let similarityRate = '-';
@@ -35,89 +38,18 @@
 	// let showAnnotatedToggler = false;
 	// let showImageBlending = false;
 	// let showImageBlendedToggler = false;
-	let displacementMaps = ['/maps/dPerlin.jpg', '/maps/dMap.jpg', '/maps/dNoise.jpg', '/maps/dMap2.jpg'];
+	let displacementMaps = [
+		'/maps/dMap.jpg',
+		'/maps/dMap2.jpg',
+		'/maps/dSpots.jpg',
+		'/maps/dWave.jpg',
+		'/maps/dNoise.jpg',
+		'/maps/dDistortion.jpg',
+		// '/maps/Moon_Displace_1014_preview.jpg',
+		// '/maps/Earth_Disp_1022_preview.jpg',
+	];
 	let displacementSprites = [];
 	let displacementFilters = [];
-
-	const vulgarityDetection = (landmarks) => {
-		// state: -1 = unknown, 0 = close, 1 = open
-		
-		// Naive implementation using the wrist as reference
-		// To infer whether the hand is pointing up or downwards
-		const wrist = landmarks[0];
-		const handIsPointingUp = wrist.y > landmarks[6].y; // Can be any connecting joint on the hand 
-		const r = {};
-
-		if (handIsPointingUp) {
-			if (landmarks[6].y > landmarks[7].y && landmarks[7].y > landmarks[8].y) {
-				r.index_state = 1;
-			} else if (landmarks[6].y < landmarks[8].y) {
-				r.index_state = 0;
-			} else {
-				r.index_state = -1;
-			}
-			
-			if (landmarks[10].y > landmarks[11].y && landmarks[11].y > landmarks[12].y) {
-				r.middle_state = 1;
-			} else if (landmarks[10].y < landmarks[12].y) {
-				r.middle_state = 0;
-			} else {
-				r.middle_state = -1;
-			}
-			
-			if (landmarks[14].y > landmarks[15].y && landmarks[15].y > landmarks[16].y) {
-				r.ring_state = 1;
-			} else if (landmarks[14].y < landmarks[16].y) {
-				r.ring_state = 0;
-			} else {
-				r.ring_state = -1;
-			}
-			
-			if (landmarks[18].y > landmarks[19].y && landmarks[19].y > landmarks[20].y) {
-				r.pinky_state = 1;
-			} else if (landmarks[18].y < landmarks[20].y) {
-				r.pinky_state = 0;
-			} else {
-				r.pinky_state = -1;
-			}
-		} else {
-			if (landmarks[6].y < landmarks[7].y && landmarks[7].y < landmarks[8].y) {
-				r.index_state = 1;
-			} else if (landmarks[6].y > landmarks[8].y) {
-				r.index_state = 0;
-			} else {
-				r.index_state = -1;
-			}
-			
-			if (landmarks[10].y < landmarks[11].y && landmarks[11].y < landmarks[12].y) {
-				r.middle_state = 1;
-			} else if (landmarks[10].y > landmarks[12].y) {
-				r.middle_state = 0;
-			} else {
-				r.middle_state = -1;
-			}
-			
-			if (landmarks[14].y < landmarks[15].y && landmarks[15].y < landmarks[16].y) {
-				r.ring_state = 1;
-			} else if (landmarks[14].y > landmarks[16].y) {
-				r.ring_state = 0;
-			} else {
-				r.ring_state = -1;
-			}
-			
-			if (landmarks[18].y < landmarks[19].y && landmarks[19].y < landmarks[20].y) {
-				r.pinky_state = 1;
-			} else if (landmarks[18].y > landmarks[20].y) {
-				r.pinky_state = 0;
-			} else {
-				r.pinky_state = -1;
-			}
-		}
-
-		if (r.index_state === 0 && r.middle_state === 1 && r.ring_state === 0 && r.pinky_state === 0) {
-			alert("HEY! WATCH IT!");
-		}
-	};
 
 	const addFilterLayer = () => {
 		displacementMaps.forEach((map) => {
@@ -167,16 +99,18 @@
 		const closestMatch = isMirrorResult ? normalSimilarMatch : mirrorXSimilarMatch;
 		const closestIndex = closestMatch.i;
 
-		vulgarityDetection(landmarks);
+		const hasDetectedVulgarity = vulgarityDetection(landmarks);
 
 		if (closestIndex) {
 			const closestHand = DATASET[closestIndex];
 
-			// activeImage = showAnnotatedImages
-			// 	? `/images-coco-final-ann/${closestHand.file}`
-			// 	: `/images-coco-final/${closestHand.file}`;
-			// activeImage = `/images/${closestHand.file}`;
-			activeImage = `/images_compressed/${closestHand.file}`;
+			if (hasDetectedVulgarity) {
+				// Attach to a different set of images
+				// OR a whole different experience
+				activeImage = `/images/${closestHand.file}`;
+			} else {
+				activeImage = `/images/${closestHand.file}`;
+			}
 
 			// if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
 			if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage && !isAnimating) {
@@ -245,7 +179,7 @@
 
 							newImageSprite.alpha = 0;
 
-							const animDuration = 500;
+							const animDuration = 1200;
 
 							const transitionTimeline = anime.timeline({
 								easing: 'easeOutExpo',
@@ -255,8 +189,8 @@
 							transitionTimeline.add(
 								{
 									targets: randomFilter.scale,
-									x: Math.floor(Math.max(100, Math.random() * 1200)),
-									y: Math.floor(Math.max(100, Math.random() * 1200)),
+									x: Math.floor(Math.max(100, Math.random() * 800)),
+									y: Math.floor(Math.max(100, Math.random() * 800)),
 								},
 								0,
 							);
@@ -271,17 +205,17 @@
 
 							transitionTimeline.add(
 								{
-									targets: randomFilter.scale,
-									y: 0.1,
-									x: 0.1,
+									targets: newImageSprite,
+									alpha: [0, 1],
 								},
-								animDuration * 0.75,
+								animDuration * 0.5,
 							);
 
 							transitionTimeline.add(
 								{
-									targets: newImageSprite,
-									alpha: 1,
+									targets: randomFilter.scale,
+									y: 0.1,
+									x: 0.1,
 								},
 								animDuration * 0.75,
 							);
@@ -292,42 +226,6 @@
 						}
 					});
 				}
-
-				// The anchor is the attachment point for a texture (normalized to the size of the sprite),
-				// the pivot point is the point around which an object rotates (in pixel values).
-
-				// const offsetHandToCenterX = (1 - closestHand.center[0] - 0.5) * imageEl.width * scaled;
-				// const offsetHandToCenterY = (closestHand.center[1] - 0.5) * imageEl.height * scaled;
-
-				// const scaledMoveX = (imageEl.width * scaled) / 2;
-				// const scaledMoveY = (imageEl.height * scaled) / 2;
-
-				// // On Flipping: + for x flipped || - if non flipped image
-				// // Move the origin to allow the image to always be placed dead centered WHEN drawImage coordiantes are [0, 0]
-				// // Translate takes into account the inverted scale of X
-				// if (isMirrorResult) {
-				// 	canvasContext.translate(canvasEl.width / 2 + scaledMoveX, canvasEl.height / 2 - scaledMoveY);
-				// 	canvasContext.scale(-1, 1);
-				// } else {
-				// 	canvasContext.translate(canvasEl.width / 2 - scaledMoveX, canvasEl.height / 2 - scaledMoveY);
-				// }
-
-				// canvasContext.drawImage(
-				// 	imageEl,
-				// 	-offsetHandToCenterX,
-				// 	-offsetHandToCenterY,
-				// 	imageEl.width * scaled,
-				// 	imageEl.height * scaled,
-				// );
-
-				// canvasContext.strokeRect(
-				// 	-offsetHandToCenterX,
-				// 	-offsetHandToCenterY,
-				// 	imageEl.width * scaled,
-				// 	imageEl.height * scaled,
-				// );
-
-				// canvasContext.restore();
 			}
 		}
 	};
@@ -358,6 +256,12 @@
 		canvasContext.restore();
 	};
 
+	const drawPIXIHands = (landmarks) => {
+		mpHand.clear();
+
+		drawCustomHands(PixiApp.screen, mpHand, landmarks);
+	};
+
 	const handleHandsResults = (results) => {
 		const { multiHandLandmarks, multiHandedness, image } = results;
 
@@ -375,15 +279,10 @@
 
 				drawImages(landmarks);
 
-				drawHands(handCanvasContext, results);
-
-				// if (label !== currentHandLabel) {
-				// 	currentHandLabel = label;
-				// }
+				drawPIXIHands(landmarks);
 			});
 		} else {
 			activeImage = '';
-			// currentHandLabel = 'None';
 		}
 	};
 
@@ -399,18 +298,24 @@
 			view: canvasEl,
 			antialias: true, // default: false
 			backgroundColor: 0xbbf2b5,
-			// resolution: window.devicePixelRatio || 1,
 			resizeTo: window,
 		});
 
 		imageContainer = new PIXI.Container();
+		handContainer = new PIXI.Container();
 		PixiApp.stage.addChild(imageContainer);
+		PixiApp.stage.addChild(handContainer);
 
-		let draw = () => {
+		// Pre-init container to draw hands in
+		mpHand = new PIXI.Graphics();
+		PixiApp.stage.addChild(mpHand);
+		mpHand.filters = [new PIXI.filters.BlurFilter(18)];
+
+		let pixiRender = () => {
 			PixiApp.renderer.render(PixiApp.stage);
-			window.requestAnimationFrame(draw);
+			window.requestAnimationFrame(pixiRender);
 		};
-		draw();
+		pixiRender();
 	};
 
 	onMount(() => {
@@ -423,51 +328,6 @@
 		mediaHands.onResults(handleHandsResults);
 
 		render();
-
-		// let img1 = PIXI.Sprite.from('/images_compressed/10.jpg');
-		// img1.height = 800;
-		// img1.width = 600;
-		// img1.position.x = 75;
-		// img1.position.y = 50;
-		// imageContainer.addChild(img1);
-
-		// let img2 = PIXI.Sprite.from('/images_compressed/12.jpg');
-		// img2.height = 800;
-		// img2.width = 600;
-		// img2.position.x = 125;
-		// img2.position.y = 50;
-		// img2.alpha = 0;
-		// imageContainer.addChild(img2);
-		// console.log('img2:', img2);
-
-		// tl = anime.timeline({
-		// 	easing: 'easeOutExpo',
-		// 	duration: 1750,
-		// });
-
-		// tl.add({
-		// 	targets: displacementFilter.scale,
-		// 	y: 0.1,
-		// 	x: 0.1,
-		// });
-
-		// tl.add({
-		// 	targets: displacementFilter.scale,
-		// 	y: 600,
-		// 	x: 0.1,
-		// });
-
-		// //add filters
-		// let displacementSprite = PIXI.Sprite.from('/displacementMap.jpg');
-		// displacementSprite.width = app.renderer.width * 1.5;
-		// displacementSprite.height = app.renderer.height * 1.5;
-		// let displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
-		// displacementFilter.scale.set(0.1);
-		// displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
-
-		// app.stage.addChild(displacementSprite);
-		// container.filters = [displacementFilter];
-		// app.stage.addChild(container);
 	});
 </script>
 
@@ -481,8 +341,6 @@
 		<canvas class="hand-canvas" bind:this={handCanvasEl} />
 	</aside>
 
-	<!-- <img src="/images-coco-final/10.jpg" alt=""> -->
-	<!-- <img src="/images-coco-final/11.jpg" alt=""> -->
 	<!-- {#if $hasIntroTransitionEnded}
 		<aside transition:fade class="hand-info-container">
 			<span class="toggler">

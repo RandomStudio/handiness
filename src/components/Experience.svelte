@@ -1,7 +1,7 @@
 <script>
 	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { findMostSimilarMatch } from '../utils';
+	import { findMostSimilarMatch } from '../utils/vptree';
 
 	import { hasDetectedFirstHand, hasIntroTransitionEnded } from '../stores';
 

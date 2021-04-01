@@ -63,7 +63,7 @@
 
 {#if !hasExperienceStarted}
 	<section transition:fade>
-		<h1>Handy Image Search</h1>
+		<h1>Rethink Intro - DreamyHands</h1>
 
 		<div
 			class="preview-container"

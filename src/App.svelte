@@ -4,7 +4,7 @@
 	import initMediaHands from './tracking/initMediaHands';
 	import initCamera from './tracking/initCamera';
 
-	import { buildVPTree } from './utils';
+	import { buildVPTree } from './utils/vptree';
 
 	import Intro from './components/Intro.svelte';
 	import Experience from './components/Experience.svelte';
