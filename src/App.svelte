@@ -18,8 +18,12 @@
 	let isAboutOpen = false;
 	let hasExperienceStarted = false;
 
+	let imageHostURL = '/subwayhands-images/';
+	// let imageHostURL = 'https://doppelhand.s3.eu-central-1.amazonaws.com/images';
+
 	const startVideo = async () => {
-		const data = await fetch('/output.json');
+		// const data = await fetch('/output.json');
+		const data = await fetch('/subwayhands.json');
 		dataset = await data.json();
 
 		buildVPTree(dataset.map((data) => data.landmarks));
@@ -42,7 +46,7 @@
 	{/if}
 
 	{#if mediaHands}
-		<ExperiencePixi {videoEl} {mediaHands} DATASET={dataset} />
+		<ExperiencePixi {videoEl} {mediaHands} DATASET={dataset} imageHostURL={imageHostURL} />
 
 		<!-- <Experience {videoEl} {mediaHands} DATASET={dataset} /> -->
 	{/if}

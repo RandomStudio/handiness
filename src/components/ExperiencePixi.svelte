@@ -12,6 +12,7 @@
 
 	export let videoEl;
 	export let mediaHands;
+	export let imageHostURL;
 	export let DATASET;
 
 	let PixiApp;
@@ -107,9 +108,12 @@
 			if (hasDetectedVulgarity) {
 				// Attach to a different set of images
 				// OR a whole different experience
-				activeImage = `/images/${closestHand.file}`;
+				// alert("Yes Larix, that's a bird");
+				// activeImage = `/images/${closestHand.file}`;
 			} else {
-				activeImage = `/images/${closestHand.file}`;
+				activeImage = `${imageHostURL}/${closestHand.file}`;
+				// activeImage = `/images/${closestHand.file}`;
+				// activeImage = `${imageHostURL}/${closestHand.file}`;
 			}
 
 			// if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
@@ -133,7 +137,7 @@
 				const scaled = yDiff;
 
 				const newTexture = PIXI.Texture.from(activeImage);
-
+			
 				const newImageSprite = new PIXI.Sprite(newTexture);
 
 				// Scaling does not affect coordinate system
@@ -230,32 +234,6 @@
 		}
 	};
 
-	const drawHands = (canvasContext, results) => {
-		canvasContext.save();
-
-		canvasContext.clearRect(0, 0, handCanvasEl.width, handCanvasEl.height);
-		if (results.multiHandLandmarks && results.multiHandedness) {
-			for (let index = 0; index < results.multiHandLandmarks.length; index++) {
-				const classification = results.multiHandedness[index];
-				const isRightHand = classification.label === 'Right';
-				const landmarks = results.multiHandLandmarks[index];
-
-				drawConnectors(canvasContext, landmarks, HAND_CONNECTIONS, {
-					color: isRightHand ? '#00FF00' : '#FF0000',
-					lineWidth: 5,
-				});
-
-				drawLandmarks(canvasContext, landmarks, {
-					fillColor: isRightHand ? '#FF0000' : '#00FF00',
-					lineWidth: 5,
-					radius: 1,
-				});
-			}
-		}
-
-		canvasContext.restore();
-	};
-
 	const drawPIXIHands = (landmarks) => {
 		mpHand.clear();
 
@@ -266,20 +244,20 @@
 		const { multiHandLandmarks, multiHandedness, image } = results;
 
 		if (!$hasDetectedFirstHand && multiHandedness?.length) {
-			console.log(results);
 			hasDetectedFirstHand.set(true);
+
 			return;
 		}
 
 		if (!$hasIntroTransitionEnded) return;
-
+		
 		if (multiHandedness?.length) {
 			multiHandedness.forEach(({ label }, index) => {
 				const landmarks = multiHandLandmarks[index];
 
 				drawImages(landmarks);
 
-				drawPIXIHands(landmarks);
+				// drawPIXIHands(landmarks);
 			});
 		} else {
 			activeImage = '';
@@ -309,7 +287,7 @@
 		// Pre-init container to draw hands in
 		mpHand = new PIXI.Graphics();
 		PixiApp.stage.addChild(mpHand);
-		mpHand.filters = [new PIXI.filters.BlurFilter(18)];
+		// mpHand.filters = [new PIXI.filters.BlurFilter(18)];
 
 		let pixiRender = () => {
 			PixiApp.renderer.render(PixiApp.stage);
