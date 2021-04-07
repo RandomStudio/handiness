@@ -18,12 +18,15 @@
 	let isAboutOpen = false;
 	let hasExperienceStarted = false;
 
-	let imageHostURL = '/subwayhands-images/';
-	// let imageHostURL = 'https://doppelhand.s3.eu-central-1.amazonaws.com/images';
+
+	const params = new URLSearchParams(window.location.search);
+	const showSubwayCollection = params.get("subway");
+
+	let imageHostURL = showSubwayCollection ? '/subwayhands-images' : 'https://doppelhand.s3.eu-central-1.amazonaws.com/images';
 
 	const startVideo = async () => {
-		// const data = await fetch('/output.json');
-		const data = await fetch('/subwayhands.json');
+		const handsData = showSubwayCollection ? '/subwayhands.json' : '/output.json';
+		const data = await fetch(handsData);
 		dataset = await data.json();
 
 		buildVPTree(dataset.map((data) => data.landmarks));
