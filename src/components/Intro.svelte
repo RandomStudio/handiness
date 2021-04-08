@@ -1,7 +1,5 @@
 <script>
-	import { fade, fly } from 'svelte/transition';
-	import { tweened } from 'svelte/motion';
-	import { cubicOut, elasticOut, sineIn, sineInOut } from 'svelte/easing';
+	import { fade } from 'svelte/transition';
 
 	import { hasDetectedFirstHand, hasIntroTransitionEnded } from '../stores';
 
@@ -22,8 +20,7 @@
 	});
 
 	const startVideo = () => {
-		videoPromise = handleStartVideo().then(() => {
-		});
+		videoPromise = handleStartVideo;
 
 		shouldStartLoading = true;
 	};
@@ -51,9 +48,9 @@
 			{:else}
 				<div transition:fade class="container-cta-loader">
 					{#await videoPromise}
-						<p in:fade={{delay:400}} out:fade={{delay: 0}} class="text-offset">Loading...</p>
+						<p in:fade={{ delay: 400 }} out:fade={{ delay: 0 }} class="text-offset">Loading...</p>
 					{:then result}
-						<div in:fade={{delay: 400}} class="container-cta">
+						<div in:fade={{ delay: 400 }} class="container-cta">
 							<picture>
 								<source srcset="high-five.webp" type="image/webp" />
 								<source srcset="high-five.jpg" type="image/jpeg" />
@@ -140,7 +137,7 @@
 		@media all and (min-width: 480px) {
 			padding: 30vh 24px 0;
 		}
-		
+
 		h1 {
 			margin-bottom: 0.4rem;
 			font-size: var(--font-medium);
@@ -174,25 +171,24 @@
 		color: var(--color-black);
 
 		@media all and (min-width: 480px) {
-			padding: 14vh 24px 0;
+			padding: 18vh 24px 0;
 		}
 
 		.text-offset {
 			@media all and (min-width: 480px) {
 				padding: 25vh 0 0;
-
 			}
 		}
 	}
 
 	.container-cta {
-		picture {
-			img,
-			source {
-				max-height: 50vh;
-				margin-bottom: 2rem;
-				// width: 100%;
-				// max-width: 640px;
+		img,
+		source {
+			max-height: 50vh;
+			margin-bottom: 2rem;
+
+			@media all and (min-width: 480px) {
+				max-height: 35vh;
 			}
 		}
 	}
