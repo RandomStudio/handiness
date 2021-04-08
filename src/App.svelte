@@ -18,11 +18,6 @@
 
 	let isAboutOpen = false;
 
-	// const isWebGL2Supported = () => !!document.createElement('canvas').getContext('webgl2')
-
-	// let support  = ''
-	// isWebGL2Supported() ? support = 'supported' : support ='unsupported'
-
 	const params = new URLSearchParams(window.location.search);
 	const showSubwayCollection = params.get('subway');
 

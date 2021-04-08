@@ -1,4 +1,6 @@
 <script>
+	import { onMount } from 'svelte';
+
 	import { fade } from 'svelte/transition';
 
 	import { hasDetectedFirstHand, hasIntroTransitionEnded, isLoaderFlow } from '../stores';
@@ -7,6 +9,7 @@
 
 	let hasExperienceStarted = false;
 	let videoPromise;
+	let isWebGL2Supported;
 
 	hasDetectedFirstHand.subscribe((value) => {
 		if (value && !hasExperienceStarted) {
@@ -16,6 +19,10 @@
 				hasExperienceStarted = true;
 			}, 500);
 		}
+	});
+
+	onMount(() => {
+		isWebGL2Supported = !!document.createElement('canvas').getContext('webgl2');
 	});
 
 	const startVideo = () => {
@@ -35,13 +42,23 @@
 			{#if !$isLoaderFlow}
 				<div out:fade class="container-intro">
 					<h1>Mirror Hand</h1>
-					<p class="description">
+					<p>
 						Hand Gesture Image Discovery
-						<br />
-						We'll need camera access for this though
+
+						{#if isWebGL2Supported}
+							<br />
+							We'll need camera access for this though
+						{/if}
 					</p>
 
-					<button on:click={startVideo}>Let's do this!</button>
+					{#if !isWebGL2Supported}
+						<p class="unsupported">
+							“Sorry your browser does not support WebGL2. If you are on a iPhone, then... I am so sorry, lets try to
+							meet on Firefox/Chrome”
+						</p>
+					{:else}
+						<button on:click={startVideo}>Let's do this!</button>
+					{/if}
 				</div>
 			{:else}
 				<div transition:fade class="container-cta-loader">
@@ -141,7 +158,6 @@
 			font-size: var(--font-medium);
 
 			@media all and (min-width: 480px) {
-				// margin-bottom: 2rem;
 				font-size: var(--font-large);
 			}
 		}
@@ -185,7 +201,6 @@
 	}
 
 	.container-cta {
-		// picture {
 		img,
 		source {
 			max-height: 50vh;
@@ -195,6 +210,10 @@
 				max-height: 35vh;
 			}
 		}
-		// }
+	}
+
+	.unsupported {
+		max-width: 36rem;
+		margin-top: 1em;
 	}
 </style>
