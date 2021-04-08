@@ -1,40 +1,39 @@
 <script>
 	import { fade } from 'svelte/transition';
 
-	import { hasDetectedFirstHand, hasIntroTransitionEnded } from '../stores';
+	import { hasDetectedFirstHand, hasIntroTransitionEnded, isLoaderFlow } from '../stores';
 
 	export let handleStartVideo;
 
 	let hasExperienceStarted = false;
-	let shouldStartLoading = false;
-
 	let videoPromise;
 
 	hasDetectedFirstHand.subscribe((value) => {
 		if (value && !hasExperienceStarted) {
 			setTimeout(() => {
 				hasIntroTransitionEnded.set(true);
+				isLoaderFlow.set(false);
 				hasExperienceStarted = true;
 			}, 500);
 		}
 	});
 
 	const startVideo = () => {
-		videoPromise = handleStartVideo;
+		videoPromise = handleStartVideo();
 
-		shouldStartLoading = true;
+		isLoaderFlow.set(true);
 	};
 </script>
 
 {#if !hasExperienceStarted}
 	<div class="container" out:fade>
-		{#if !shouldStartLoading}
+		{#if !$isLoaderFlow}
 			<div out:fade class="background" />
 		{/if}
 		<div class="backdrop" />
 
 		<section>
-			{#if !shouldStartLoading}
+			{#if !$isLoaderFlow}
 				<div out:fade class="container-intro">
 					<h1>Mirror Hand</h1>
 					<p class="description">
@@ -182,6 +181,7 @@
 	}
 
 	.container-cta {
+		// picture {
 		img,
 		source {
 			max-height: 50vh;
@@ -191,5 +191,6 @@
 				max-height: 35vh;
 			}
 		}
+		// }
 	}
 </style>

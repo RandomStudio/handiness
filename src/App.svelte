@@ -6,23 +6,28 @@
 
 	import { buildVPTree } from './utils/vptree';
 
+	import { hasExperienceStarted, isLoaderFlow } from './stores';
+
 	import Intro from './components/Intro.svelte';
-	import Experience from './components/Experience.svelte';
 	import ExperiencePixi from './components/ExperiencePixi.svelte';
 	import About from './components/About.svelte';
 
-	let videoEl = document.createElement('video');
+	let videoEl;
 	let mediaHands;
 	let dataset;
 
 	let isAboutOpen = false;
-	let hasExperienceStarted = false;
 
+	// const isWebGL2Supported = () => !!document.createElement('canvas').getContext('webgl2')
+
+	// let support  = ''
+	// isWebGL2Supported() ? support = 'supported' : support ='unsupported'
 
 	const params = new URLSearchParams(window.location.search);
-	const showSubwayCollection = params.get("subway");
+	const showSubwayCollection = params.get('subway');
 
-	let imageHostURL = showSubwayCollection ? '/subwayhands-images' : 'https://doppelhand.s3.eu-central-1.amazonaws.com/images';
+	// let imageHostURL = showSubwayCollection ? '/subwayhands-images' : 'https://doppelhand.s3.eu-central-1.amazonaws.com/images';
+	let imageHostURL = showSubwayCollection ? '/subwayhands-images' : '/images';
 
 	const startVideo = async () => {
 		const handsData = showSubwayCollection ? '/subwayhands.json' : '/output.json';
@@ -38,28 +43,27 @@
 </script>
 
 <main>
-	{#if !isAboutOpen}
-		<aside on:click={() => (isAboutOpen = !isAboutOpen)} class="about">ABOUT</aside>
-	{:else}
-		<aside on:click={() => (isAboutOpen = !isAboutOpen)} class="about">X</aside>
-	{/if}
+	<div class={`about ${$isLoaderFlow && !isAboutOpen ? '' : 'is-white'}`} on:click={() => (isAboutOpen = !isAboutOpen)}>
+		<span>{isAboutOpen ? 'X' : '?'}</span>
+	</div>
 
 	{#if isAboutOpen}
 		<About />
 	{/if}
 
 	{#if mediaHands}
-		<ExperiencePixi {videoEl} {mediaHands} DATASET={dataset} imageHostURL={imageHostURL} />
-
-		<!-- <Experience {videoEl} {mediaHands} DATASET={dataset} /> -->
+		<ExperiencePixi {videoEl} {mediaHands} DATASET={dataset} {imageHostURL} />
 	{/if}
 
-	{#if !mediaHands || !hasExperienceStarted}
+	{#if !mediaHands || !$hasExperienceStarted}
 		<Intro handleStartVideo={startVideo} />
 	{/if}
+
+	<!-- svelte-ignore a11y-media-has-caption -->
+	<video bind:this={videoEl} playsinline />
 </main>
 
-<style>
+<style lang="scss">
 	main {
 		position: relative;
 		width: 100%;
@@ -67,16 +71,40 @@
 		margin: 0;
 		background: #bbf2b5;
 	}
+
+	video {
+		display: none;
+		visibility: hidden;
+	}
+
 	.about {
-		cursor: pointer;
 		position: absolute;
-		right: 25px;
-		top: 25px;
-		padding: 6px;
-		border: 2px solid black;
-		font-size: 20px;
+		top: 12px;
+		right: 12px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 1.6rem;
+		width: 1.6rem;
+		border: 2px solid var(--color-black);
+		border-radius: 2rem;
+		font-size: var(--font-normal);
 		font-weight: bolder;
-		border-radius: 20px;
+		color: var(--color-black);
 		z-index: 10;
+		cursor: pointer;
+
+		&.is-white {
+			border-color: var(--color-white);
+			color: var(--color-white);
+		}
+
+		@media all and (min-width: 480px) {
+			top: 24px;
+			right: 24px;
+			height: 2.4rem;
+			width: 2.4rem;
+			font-size: var(--font-medium);
+		}
 	}
 </style>
