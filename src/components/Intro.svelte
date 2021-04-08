@@ -20,7 +20,6 @@
 
 	const startVideo = () => {
 		videoPromise = handleStartVideo();
-
 		isLoaderFlow.set(true);
 	};
 </script>
@@ -152,6 +151,7 @@
 
 		button {
 			border: 2px solid var(--color-white);
+			border-radius: 2rem;
 			background: none;
 			font-weight: bold;
 			min-width: 8rem;
@@ -159,6 +159,10 @@
 			width: 100%;
 			color: var(--color-black);
 			background: var(--color-white);
+
+			&:focus {
+				outline: none;
+			}
 		}
 	}
 

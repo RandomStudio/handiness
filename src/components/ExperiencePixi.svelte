@@ -1,14 +1,13 @@
 <script>
-	import { onDestroy, onMount } from 'svelte';
-	import { fade } from 'svelte/transition';
-
+	import { onMount } from 'svelte';
 	import anime from 'animejs/lib/anime.es.js';
-
 	import * as PIXI from 'pixi.js';
 
 	import { findMostSimilarMatch } from '../utils/vptree';
 	import { hasDetectedFirstHand, hasIntroTransitionEnded } from '../stores';
 	import { drawCustomHands, vulgarityDetection } from '../utils/handUtils.js';
+
+	import HandLostPrompt from './HandLostPrompt.svelte';
 
 	export let videoEl;
 	export let mediaHands;
@@ -19,26 +18,15 @@
 
 	let imageEl;
 	let canvasEl;
-	let canvasContext;
-	let handCanvasEl;
-	let handCanvasContext;
 
 	let imageContainer;
 	let handContainer;
 	let mpHand;
 	let IMAGES_LIMIT = 10;
 	let activeImage = '';
-	let activeImages = [];
 	let prevActiveImage;
 	let isAnimating = false;
 
-	// let similarityRate = '-';
-	// let currentHandLabel = 'None';
-
-	// let showAnnotatedImages = false;
-	// let showAnnotatedToggler = false;
-	// let showImageBlending = false;
-	// let showImageBlendedToggler = false;
 	let displacementMaps = [
 		'/maps/dMap.jpg',
 		'/maps/dMap2.jpg',
@@ -46,11 +34,10 @@
 		'/maps/dWave.jpg',
 		'/maps/dNoise.jpg',
 		'/maps/dDistortion.jpg',
-		// '/maps/Moon_Displace_1014_preview.jpg',
-		// '/maps/Earth_Disp_1022_preview.jpg',
 	];
 	let displacementSprites = [];
 	let displacementFilters = [];
+
 
 	const addFilterLayer = () => {
 		displacementMaps.forEach((map) => {
@@ -137,7 +124,7 @@
 				const scaled = yDiff;
 
 				const newTexture = PIXI.Texture.from(activeImage);
-			
+
 				const newImageSprite = new PIXI.Sprite(newTexture);
 
 				// Scaling does not affect coordinate system
@@ -240,6 +227,20 @@
 		drawCustomHands(PixiApp.screen, mpHand, landmarks);
 	};
 
+	let handPromptSchedule = null;
+	let isHandPromptVisible = false;
+	const checkShouldScheduleHandPrompt = (areHandsDetected) => {
+		if (!areHandsDetected && !handPromptSchedule) {
+			handPromptSchedule = setTimeout(() => {
+				isHandPromptVisible = true;
+			}, 1500);
+		} else if (areHandsDetected && handPromptSchedule) {
+			clearTimeout(handPromptSchedule);
+			handPromptSchedule = null;
+			isHandPromptVisible = false;
+		}
+	};
+
 	const handleHandsResults = (results) => {
 		const { multiHandLandmarks, multiHandedness, image } = results;
 
@@ -250,7 +251,9 @@
 		}
 
 		if (!$hasIntroTransitionEnded) return;
-		
+
+		checkShouldScheduleHandPrompt(multiHandedness?.length);
+
 		if (multiHandedness?.length) {
 			multiHandedness.forEach(({ label }, index) => {
 				const landmarks = multiHandLandmarks[index];
@@ -299,10 +302,7 @@
 	onMount(() => {
 		initCanvas();
 		addFilterLayer();
-
-		canvasContext = canvasEl.getContext('2d');
-		handCanvasContext = handCanvasEl.getContext('2d');
-
+		addLeakingHand();
 		mediaHands.onResults(handleHandsResults);
 
 		render();
@@ -310,38 +310,14 @@
 </script>
 
 <div class="container">
+	<!-- svelte-ignore a11y-missing-attribute -->
 	<img bind:this={imageEl} src={activeImage} />
 
 	<canvas class="main-canvas" bind:this={canvasEl} />
 
-	<aside class="hand-canvas-container">
-		<!-- <p>{currentHandLabel === 'None' ? 'Raise Your Hand' : 'Your Hand:'}</p> -->
-		<canvas class="hand-canvas" bind:this={handCanvasEl} />
-	</aside>
-
-	<!-- {#if $hasIntroTransitionEnded}
-		<aside transition:fade class="hand-info-container">
-			<span class="toggler">
-				<span class:active={showAnnotatedToggler} class="toggle-switch" on:click={switchImageType}>
-					<span class="toggle-knob" />
-				</span>
-				Display Annotation
-			</span>
-			<span class="toggler">
-				<span class:active={showImageBlendedToggler} class="toggle-switch" on:click={switchImageBlending}>
-					<span class="toggle-knob" />
-				</span>
-				Blend Images
-			</span>
-			<p>Detected Hand: {currentHandLabel}</p>
-
-			<div transition:fade class="similarity-container" style={`--similarityRate: ${similarityRate / 100}`}>
-				<span />
-				<p>Similiarity: {similarityRate}%</p>
-			</div>
-
-		</aside>
-	{/if} -->
+	{#if isHandPromptVisible}
+		<HandLostPrompt />
+	{/if}
 </div>
 
 <style lang="scss">
