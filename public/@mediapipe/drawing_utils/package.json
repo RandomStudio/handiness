@@ -1,34 +1,36 @@
 {
-  "_from": "@mediapipe/drawing_utils",
-  "_id": "@mediapipe/drawing_utils@0.1.1613083488",
+  "_args": [
+    [
+      "@mediapipe/drawing_utils@0.2.1617146986",
+      "/home/kyunwang/_Projects/pointypoint"
+    ]
+  ],
+  "_from": "@mediapipe/drawing_utils@0.2.1617146986",
+  "_id": "@mediapipe/drawing_utils@0.2.1617146986",
   "_inBundle": false,
-  "_integrity": "sha512-cpKhgZ+Y6v8PgIcR2RBYciChuefKB3RtLInrNiZ6Y0/bJVZT8U0stMrtl/Y/rdQx1Y3mmxuWYlUkfSqAIjY9Kg==",
+  "_integrity": "sha512-NWdIC80FS6HvMhah0G9Q2198RhQwNyjT+v07ZEF3S+5IcrjSDwbWM9QeF2MBtw+kU26HsepsOqEuRw196zPmNw==",
   "_location": "/@mediapipe/drawing_utils",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "version",
     "registry": true,
-    "raw": "@mediapipe/drawing_utils",
+    "raw": "@mediapipe/drawing_utils@0.2.1617146986",
     "name": "@mediapipe/drawing_utils",
     "escapedName": "@mediapipe%2fdrawing_utils",
     "scope": "@mediapipe",
-    "rawSpec": "",
+    "rawSpec": "0.2.1617146986",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "0.2.1617146986"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/@mediapipe/drawing_utils/-/drawing_utils-0.1.1613083488.tgz",
-  "_shasum": "a41b965f4e74d6213c034a36259cb35a371f5fbe",
-  "_spec": "@mediapipe/drawing_utils",
-  "_where": "/mnt/c/Users/Kyunwang/Documents/Spaces/Work/MediaPipe-Hands/tha-wise-monkey-know-wha-leg-fi-clime",
+  "_resolved": "https://registry.npmjs.org/@mediapipe/drawing_utils/-/drawing_utils-0.2.1617146986.tgz",
+  "_spec": "0.2.1617146986",
+  "_where": "/home/kyunwang/_Projects/pointypoint",
   "author": {
     "name": "mhays@google.com"
   },
-  "bundleDependencies": false,
-  "deprecated": false,
   "description": "Mediapipe Simple Drawing Utilities",
   "homepage": "https://google.github.io/mediapipe/solutions",
   "license": "Apache-2.0",
@@ -37,5 +39,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "0.1.1613083488"
+  "version": "0.2.1617146986"
 }

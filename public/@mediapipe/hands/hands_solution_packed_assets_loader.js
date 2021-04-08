@@ -181,7 +181,7 @@ Module['FS_createPath']("/third_party/mediapipe/modules", "hand_landmark", true,
     }
   
    }
-   loadPackage({"files": [{"filename": "/third_party/mediapipe/modules/palm_detection/palm_detection.tflite", "start": 0, "end": 3877888, "audio": 0}, {"filename": "/third_party/mediapipe/modules/hand_landmark/handedness.txt", "start": 3877888, "end": 3877899, "audio": 0}, {"filename": "/third_party/mediapipe/modules/hand_landmark/hand_landmark.tflite", "start": 3877899, "end": 7670519, "audio": 0}], "remote_package_size": 7670519, "package_uuid": "faed2421-d250-4ede-884f-625b381c9627"});
+   loadPackage({"files": [{"filename": "/third_party/mediapipe/modules/palm_detection/palm_detection.tflite", "start": 0, "end": 3877888, "audio": 0}, {"filename": "/third_party/mediapipe/modules/hand_landmark/handedness.txt", "start": 3877888, "end": 3877899, "audio": 0}, {"filename": "/third_party/mediapipe/modules/hand_landmark/hand_landmark.tflite", "start": 3877899, "end": 7670519, "audio": 0}], "remote_package_size": 7670519, "package_uuid": "73bd46da-d6ed-4934-b7fc-e3a302401ca2"});
   
   })();
   

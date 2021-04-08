@@ -1,41 +1,43 @@
 {
-  "_from": "@mediapipe/hands",
-  "_id": "@mediapipe/hands@0.1.1613506466",
+  "_args": [
+    [
+      "@mediapipe/hands@0.1.1617147326",
+      "/home/kyunwang/_Projects/pointypoint"
+    ]
+  ],
+  "_from": "@mediapipe/hands@0.1.1617147326",
+  "_id": "@mediapipe/hands@0.1.1617147326",
   "_inBundle": false,
-  "_integrity": "sha512-T2SQcTAevDR/hV/2zwSpzhe8IRxy0SEp0VWbpVV6u0JeU20cPo9j5WKyspmbGeGz1CtCtW20zhF7Bc9fmeAFPg==",
+  "_integrity": "sha512-dEAeqJ1cfCv6/j8LMDhXmfvcoG46J902kQoaoCyJyGMe8ZPNPQRvtAlZ6Y/PeL6x7dlLeLBlT1sSzkKGEgqBKg==",
   "_location": "/@mediapipe/hands",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "version",
     "registry": true,
-    "raw": "@mediapipe/hands",
+    "raw": "@mediapipe/hands@0.1.1617147326",
     "name": "@mediapipe/hands",
     "escapedName": "@mediapipe%2fhands",
     "scope": "@mediapipe",
-    "rawSpec": "",
+    "rawSpec": "0.1.1617147326",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "0.1.1617147326"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/@mediapipe/hands/-/hands-0.1.1613506466.tgz",
-  "_shasum": "ef648272b65b209989316de921ad2697ac0871ce",
-  "_spec": "@mediapipe/hands",
-  "_where": "/mnt/c/Users/Kyunwang/Documents/Spaces/Work/MediaPipe-Hands/tha-wise-monkey-know-wha-leg-fi-clime",
+  "_resolved": "https://registry.npmjs.org/@mediapipe/hands/-/hands-0.1.1617147326.tgz",
+  "_spec": "0.1.1617147326",
+  "_where": "/home/kyunwang/_Projects/pointypoint",
   "author": {
     "name": "mhays@google.com"
   },
-  "bundleDependencies": false,
-  "deprecated": false,
   "description": "Mediapipe Hands Solution",
   "homepage": "https://google.github.io/mediapipe/solutions/hands",
   "license": "Apache-2.0",
-  "main": "./hands.js",
+  "main": "",
   "name": "@mediapipe/hands",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "0.1.1613506466"
+  "version": "0.1.1617147326"
 }

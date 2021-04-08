@@ -58,8 +58,6 @@ input:disabled {
 button {
 	color: var(--color-black);
 	background-color: #f4f4f4;
-	/* outline: none; */
-	/* border-radius: 0; */
 }
 
 button:hover {
