@@ -1,6 +1,5 @@
 <script>
 	import { onMount } from 'svelte';
-
 	import { fade } from 'svelte/transition';
 
 	import { hasDetectedFirstHand, hasIntroTransitionEnded, isLoaderFlow, loadedFilesCount } from '../stores';
@@ -8,7 +7,6 @@
 	export let handleStartVideo;
 
 	let hasExperienceStarted = false;
-	let videoPromise;
 	let isWebGL2Supported;
 
 	let hasLoadingError = false;
@@ -28,7 +26,7 @@
 	});
 
 	const startVideo = () => {
-		videoPromise = handleStartVideo();
+		handleStartVideo();
 
 		isLoaderFlow.set(true);
 	};
@@ -37,13 +35,13 @@
 {#if !hasExperienceStarted}
 	<div class="container" out:fade>
 		{#if !$isLoaderFlow}
-			<div out:fade class="background" />
+			<div out:fade={{ duration: 300 }} class="background" />
 		{/if}
 		<div class="backdrop" />
 
 		<section>
 			{#if !$isLoaderFlow}
-				<div out:fade class="container-intro">
+				<div out:fade={{ duration: 300 }} class="container-intro">
 					<h1>Mirror Hand</h1>
 					<p>
 						Hand Gesture Image Discovery
@@ -64,23 +62,23 @@
 					{/if}
 				</div>
 			{:else}
-				<div transition:fade class="container-cta-loader">
+				<div transition:fade={{ delay: 100 }} class="container-cta-loader">
 					{#if $loadedFilesCount !== 7}
-						<p in:fade={{ delay: 400 }} out:fade class="text-offset">
+						<p out:fade class="text-offset">
 							Loading...
 							<br />
 							{$loadedFilesCount}/7
 						</p>
 					{:else if hasLoadingError}
-						<p in:fade class="text-offset">
+						<p transition:fade class="text-offset">
 							Something seems to have went wrong during initialization...<br />Please refresh the page
 						</p>
 					{:else}
-						<div in:fade={{ delay: 400 }} class="container-cta">
+						<div transition:fade class="container-cta">
 							<picture>
-								<source srcset="high-five.webp" type="image/webp" />
-								<source srcset="high-five.jpg" type="image/jpeg" />
-								<img src="high-five.jpg" alt="Illustration of two hands in the motion of a high five" />
+								<source srcset="/high-five.webp" type="image/webp" />
+								<source srcset="/high-five.jpg" type="image/jpeg" />
+								<img src="/high-five.jpg" alt="Illustration of two hands in the motion of a high five" />
 							</picture>
 							<p>Raise Your Hand in Front of the Webcam to Get Started</p>
 						</div>
@@ -197,6 +195,11 @@
 		align-items: center;
 		padding: 13.2rem 12px 0;
 		color: var(--color-black);
+		height: 100%;
+
+		& > * {
+			position: absolute;
+		}
 
 		@media all and (min-width: 480px) {
 			padding: 18vh 24px 0;
@@ -210,14 +213,17 @@
 	}
 
 	.container-cta {
+		max-height: 50vh;
+		height: 100%;
+
+		@media all and (min-width: 480px) {
+			max-height: 35vh;
+		}
+
 		img,
 		source {
-			max-height: 50vh;
+			height: 100%;
 			margin-bottom: 2rem;
-
-			@media all and (min-width: 480px) {
-				max-height: 35vh;
-			}
 		}
 	}
 

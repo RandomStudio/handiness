@@ -94,6 +94,7 @@
 		color: var(--color-black);
 		z-index: 10;
 		cursor: pointer;
+		user-select:none;
 
 		&.is-white {
 			border-color: var(--color-white);

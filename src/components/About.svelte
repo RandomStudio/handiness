@@ -51,7 +51,6 @@
 		color: var(--color-white);
 
 		z-index: 9;
-		backdrop-filter: blur(32px);
 		overflow: hidden scroll;
 
 		/* Hide scrollbar for IE, Edge and Firefox */
@@ -63,13 +62,39 @@
 			display: none;
 		}
 
+		
+		&::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			z-index: -1;
+
+			box-shadow: inset 0 0 20rem 0 rgba(255, 255, 255, .5);
+			background-color: rgba(0, 0, 0, .85);
+			filter: blur(32px);
+		}
+
+		@supports (backdrop-filter: none) {
+			backdrop-filter: blur(32px);
+
+			&::before {
+				display: none;
+			}
+		}
+		
+
 		@media all and (min-width: 480px) {
 			padding: 18vh 24px 0;
 			font-size: var(--font-normal);
 		}
 	}
+
 	.about-content {
 		max-width: 64rem;
+		
 		@media all and (min-width: 480px) {
 			display: flex;
 			margin: 0 auto;
@@ -109,9 +134,5 @@
 				padding: 0 0 0 2.4rem;
 			}
 		}
-	}
-
-	.underline {
-		text-decoration: underline;
 	}
 </style>
