@@ -6,7 +6,7 @@
 
 	import { buildVPTree } from './utils/vptree';
 
-	import { hasExperienceStarted, isLoaderFlow } from './stores';
+	import { hasExperienceStarted, isLoaderFlow, loadedFilesCount } from './stores';
 
 	import Intro from './components/Intro.svelte';
 	import ExperiencePixi from './components/ExperiencePixi.svelte';
@@ -15,6 +15,7 @@
 	let videoEl;
 	let mediaHands;
 	let dataset;
+	let datasetEasterEgg;
 
 	let isAboutOpen = false;
 
@@ -28,6 +29,11 @@
 		const handsData = showSubwayCollection ? '/subwayhands.json' : '/output.json';
 		const data = await fetch(handsData);
 		dataset = await data.json();
+		loadedFilesCount.increment();
+
+		const easterEggData = await fetch('/easteregg.json');
+		datasetEasterEgg = await easterEggData.json();
+		loadedFilesCount.increment();
 
 		buildVPTree(dataset.map((data) => data.landmarks));
 
@@ -47,7 +53,7 @@
 	{/if}
 
 	{#if mediaHands}
-		<ExperiencePixi {videoEl} {mediaHands} DATASET={dataset} {imageHostURL} />
+		<ExperiencePixi {videoEl} {mediaHands} {dataset} {datasetEasterEgg} {imageHostURL} />
 	{/if}
 
 	{#if !mediaHands || !$hasExperienceStarted}

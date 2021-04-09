@@ -3,7 +3,7 @@
 
 	import { fade } from 'svelte/transition';
 
-	import { hasDetectedFirstHand, hasIntroTransitionEnded, isLoaderFlow } from '../stores';
+	import { hasDetectedFirstHand, hasIntroTransitionEnded, isLoaderFlow, loadedFilesCount } from '../stores';
 
 	export let handleStartVideo;
 
@@ -11,13 +11,15 @@
 	let videoPromise;
 	let isWebGL2Supported;
 
+	let hasLoadingError = false;
+
 	hasDetectedFirstHand.subscribe((value) => {
 		if (value && !hasExperienceStarted) {
 			setTimeout(() => {
 				hasIntroTransitionEnded.set(true);
 				isLoaderFlow.set(false);
 				hasExperienceStarted = true;
-			}, 500);
+			}, 300);
 		}
 	});
 
@@ -27,6 +29,7 @@
 
 	const startVideo = () => {
 		videoPromise = handleStartVideo();
+
 		isLoaderFlow.set(true);
 	};
 </script>
@@ -62,9 +65,17 @@
 				</div>
 			{:else}
 				<div transition:fade class="container-cta-loader">
-					{#await videoPromise}
-						<p in:fade={{ delay: 400 }} out:fade={{ delay: 0 }} class="text-offset">Loading...</p>
-					{:then result}
+					{#if $loadedFilesCount !== 7}
+						<p in:fade={{ delay: 400 }} out:fade class="text-offset">
+							Loading...
+							<br />
+							{$loadedFilesCount}/7
+						</p>
+					{:else if hasLoadingError}
+						<p in:fade class="text-offset">
+							Something seems to have went wrong during initialization...<br />Please refresh the page
+						</p>
+					{:else}
 						<div in:fade={{ delay: 400 }} class="container-cta">
 							<picture>
 								<source srcset="high-five.webp" type="image/webp" />
@@ -73,13 +84,11 @@
 							</picture>
 							<p>Raise Your Hand in Front of the Webcam to Get Started</p>
 						</div>
-					{:catch error}
-						<p transition:fade class="text-offset">Something seems to have went wrong during initialization...</p>
-					{/await}
+					{/if}
 				</div>
 			{/if}
 
-			<footer>
+			<footer style="color: {$isLoaderFlow ? 'var(--color-black)' : 'var(--color-white)'}">
 				<p>
 					We respect your data <br />
 					meaning <br />
