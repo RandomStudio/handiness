@@ -3,6 +3,7 @@
 	import anime from 'animejs/lib/anime.es.js';
 	import * as PIXI from 'pixi.js';
 
+
 	import { findMostSimilarMatch } from '../utils/vptree';
 	import { hasDetectedFirstHand, hasIntroTransitionEnded } from '../stores';
 	import { drawCustomHands, vulgarityDetection } from '../utils/handUtils.js';
@@ -12,7 +13,8 @@
 	export let videoEl;
 	export let mediaHands;
 	export let imageHostURL;
-	export let DATASET;
+	export let dataset;
+	export let datasetEasterEgg;
 
 	let PixiApp;
 
@@ -39,6 +41,7 @@
 	let displacementFilters = [];
 
 
+
 	const addFilterLayer = () => {
 		displacementMaps.forEach((map) => {
 			let dSprite = PIXI.Sprite.from(map);
@@ -48,14 +51,16 @@
 			dSprite.anchor.set(0.5);
 
 			PixiApp.stage.addChild(dSprite);
-
 			let dFilter = new PIXI.filters.DisplacementFilter(dSprite);
+
 			dFilter.scale.set(0.1);
 
 			displacementSprites.push(dSprite);
 			displacementFilters.push(dFilter);
 		});
 
+		// let colorMatrix = new PIXI.filters.ColorMatrixFilter();
+		// displacementFilters.push(colorMatrix);
 		imageContainer.filters = displacementFilters;
 	};
 
@@ -89,15 +94,16 @@
 
 		const hasDetectedVulgarity = vulgarityDetection(landmarks);
 
-		if (closestIndex) {
-			const closestHand = DATASET[closestIndex];
+		if (closestIndex || hasDetectedVulgarity) {
+			let closestHand;
 
 			if (hasDetectedVulgarity) {
-				// Attach to a different set of images
-				// OR a whole different experience
-				// alert("Yes Larix, that's a bird");
-				// activeImage = `/images/${closestHand.file}`;
+				const randomImage = Math.floor(Math.random() * datasetEasterEgg.length) % datasetEasterEgg.length;
+
+				closestHand = datasetEasterEgg[randomImage];
+				activeImage = `/easteregg-images/${closestHand.file}`;
 			} else {
+				closestHand = dataset[closestIndex];
 				activeImage = `${imageHostURL}/${closestHand.file}`;
 				// activeImage = `/images/${closestHand.file}`;
 				// activeImage = `${imageHostURL}/${closestHand.file}`;
@@ -140,7 +146,7 @@
 					let offsetHandToCenterX = (closestHand.center[0] - 0.5) * newImageSprite.width;
 					const offsetHandToCenterY = (closestHand.center[1] - 0.5) * newImageSprite.height;
 
-					if (isMirrorResult) {
+					if (isMirrorResult && !hasDetectedVulgarity) {
 						newImageSprite.scale.set(-scaled, scaled);
 						newImageSprite.x = PixiApp.screen.width / 2 + -offsetHandToCenterX;
 					} else {
@@ -170,7 +176,7 @@
 
 							newImageSprite.alpha = 0;
 
-							const animDuration = 1200;
+							const animDuration = 800;
 
 							const transitionTimeline = anime.timeline({
 								easing: 'easeOutExpo',
@@ -222,8 +228,9 @@
 	};
 
 	const drawPIXIHands = (landmarks) => {
-		mpHand.clear();
-
+		// setTimeout(() => {
+		// 	mpHand.clear();
+		// }, 5000);
 		drawCustomHands(PixiApp.screen, mpHand, landmarks);
 	};
 
@@ -252,7 +259,7 @@
 
 		if (!$hasIntroTransitionEnded) return;
 
-		checkShouldScheduleHandPrompt(multiHandedness?.length);
+		// checkShouldScheduleHandPrompt(multiHandedness?.length);
 
 		if (multiHandedness?.length) {
 			multiHandedness.forEach(({ label }, index) => {
@@ -260,7 +267,7 @@
 
 				drawImages(landmarks);
 
-				// drawPIXIHands(landmarks);
+				drawPIXIHands(landmarks);
 			});
 		} else {
 			activeImage = '';
@@ -290,7 +297,7 @@
 		// Pre-init container to draw hands in
 		mpHand = new PIXI.Graphics();
 		PixiApp.stage.addChild(mpHand);
-		// mpHand.filters = [new PIXI.filters.BlurFilter(18)];
+		
 
 		let pixiRender = () => {
 			PixiApp.renderer.render(PixiApp.stage);
@@ -335,85 +342,9 @@
 		position: absolute;
 	}
 
-	.hand-info-container {
-		bottom: 16px;
-		left: 16px;
-		backdrop-filter: blur(32px);
-		color: white;
-
-		.similarity-container {
-			position: relative;
-			min-width: 8rem;
-			width: 100%;
-			max-width: 14rem;
-			height: 24px;
-			margin-bottom: 1.6rem;
-			background: var(--color-gray);
-			color: var(--color-white);
-			box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-
-			span {
-				display: block;
-				width: 100%;
-				height: 100%;
-				background: var(--color-black);
-				transform: scaleX(var(--similarityRate));
-				transform-origin: left;
-			}
-
-			p {
-				font-size: var(--font-small);
-				position: absolute;
-				top: 0;
-				left: 0.4em;
-			}
-		}
-
-		.toggler {
-			display: block;
-		}
-		.toggle-switch {
-			height: 22px;
-			width: 46px;
-			display: inline-block;
-			background-color: black;
-			margin: 2px;
-			vertical-align: sub;
-			border-radius: 30px;
-			cursor: pointer;
-			box-shadow: inset 1px 1px 9px -3px rgba(4, 4, 4, 0.08), 1px 2px 6px -2px rgba(0, 0, 0, 0.01);
-			.toggle-knob {
-				width: 20px;
-				height: 20px;
-				display: inline-block;
-				background-color: #ffffff;
-				border: solid 1px rgba(126, 126, 126, 0.07);
-				box-shadow: 0 1px 3px rgba(107, 106, 106, 0.26), 0 5px 1px rgba(107, 106, 106, 0.13);
-				border-radius: 26px;
-				margin: 1px 1px;
-			}
-			&.active {
-				background-color: #77e189;
-				.toggle-knob {
-					margin-left: 24px;
-				}
-			}
-		}
-	}
-
-	.hand-canvas-container {
-		bottom: 16px;
-		right: 16px;
-	}
-
 	.main-canvas {
 		position: absolute;
 		width: 100%;
 		height: initial;
-	}
-
-	.hand-canvas {
-		width: 240px;
-		height: 160px;
 	}
 </style>
