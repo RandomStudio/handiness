@@ -2,11 +2,13 @@
 	import { onMount } from 'svelte';
 	import anime from 'animejs/lib/anime.es.js';
 	import * as PIXI from 'pixi.js';
-
+	import { remap } from '@anselan/maprange'
 
 	import { findMostSimilarMatch } from '../utils/vptree';
+	import { vulgarityDetection } from '../utils/handUtils.js';
 	import { hasDetectedFirstHand, hasIntroTransitionEnded } from '../stores';
-	import { drawCustomHands, vulgarityDetection } from '../utils/handUtils.js';
+
+	import colorShaderFrag from '../shaders/colorAnimating.glsl';
 
 	import HandLostPrompt from './HandLostPrompt.svelte';
 
@@ -22,12 +24,13 @@
 	let canvasEl;
 
 	let imageContainer;
-	let handContainer;
-	let mpHand;
+	let vulgarityFilterContainer;
 	let IMAGES_LIMIT = 10;
 	let activeImage = '';
 	let prevActiveImage;
+
 	let isAnimating = false;
+	let stopMediaPipeLoop = false;
 
 	let displacementMaps = [
 		'/maps/dMap.jpg',
@@ -40,7 +43,7 @@
 	let displacementSprites = [];
 	let displacementFilters = [];
 
-
+	let shaderVulgarityFilter;
 
 	const addFilterLayer = () => {
 		displacementMaps.forEach((map) => {
@@ -51,16 +54,12 @@
 			dSprite.anchor.set(0.5);
 
 			PixiApp.stage.addChild(dSprite);
-			let dFilter = new PIXI.filters.DisplacementFilter(dSprite);
-
-			dFilter.scale.set(0.1);
+			let dFilter = new PIXI.filters.DisplacementFilter(dSprite, 0.5);
 
 			displacementSprites.push(dSprite);
 			displacementFilters.push(dFilter);
 		});
 
-		// let colorMatrix = new PIXI.filters.ColorMatrixFilter();
-		// displacementFilters.push(colorMatrix);
 		imageContainer.filters = displacementFilters;
 	};
 
@@ -93,6 +92,7 @@
 		const closestIndex = closestMatch.i;
 
 		const hasDetectedVulgarity = vulgarityDetection(landmarks);
+		hasFoundVulgarity = hasDetectedVulgarity;
 
 		if (closestIndex || hasDetectedVulgarity) {
 			let closestHand;
@@ -105,15 +105,10 @@
 			} else {
 				closestHand = dataset[closestIndex];
 				activeImage = `${imageHostURL}/${closestHand.file}`;
-				// activeImage = `/images/${closestHand.file}`;
-				// activeImage = `${imageHostURL}/${closestHand.file}`;
 			}
 
-			// if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage) {
-			if (imageEl.src.includes(activeImage) && activeImage !== prevActiveImage && !isAnimating) {
+			if (activeImage !== prevActiveImage && !isAnimating) {
 				prevActiveImage = activeImage;
-
-				// similarityRate = (1 - closestMatch.d).toFixed(2) * 100;
 
 				// Calculate the required scaling to normalize the hand bbox/size of all images
 				const landmarkCopies = [...landmarks];
@@ -162,6 +157,17 @@
 						}
 
 						if (!isAnimating) {
+							// Clean all images - making focus space for the easteregg
+							if (hasDetectedVulgarity) {
+								imageContainer.removeChildren();
+
+								stopMediaPipeLoop = true;
+
+								setTimeout(() => {
+									stopMediaPipeLoop = false;
+								}, 5000);
+							}
+
 							isAnimating = true;
 
 							imageContainer.children.forEach((image) => (image.alpha -= 0.1));
@@ -227,13 +233,6 @@
 		}
 	};
 
-	const drawPIXIHands = (landmarks) => {
-		// setTimeout(() => {
-		// 	mpHand.clear();
-		// }, 5000);
-		drawCustomHands(PixiApp.screen, mpHand, landmarks);
-	};
-
 	let handPromptSchedule = null;
 	let isHandPromptVisible = false;
 	const checkShouldScheduleHandPrompt = (areHandsDetected) => {
@@ -259,26 +258,39 @@
 
 		if (!$hasIntroTransitionEnded) return;
 
-		// checkShouldScheduleHandPrompt(multiHandedness?.length);
+		checkShouldScheduleHandPrompt(multiHandedness?.length);
 
 		if (multiHandedness?.length) {
 			multiHandedness.forEach(({ label }, index) => {
 				const landmarks = multiHandLandmarks[index];
 
 				drawImages(landmarks);
-
-				drawPIXIHands(landmarks);
 			});
 		} else {
 			activeImage = '';
 		}
 	};
 
-	const render = async () => {
-		// Stuff to do here
-		await mediaHands.send({ image: videoEl });
+	const loopMediaPipeSend = async () => {
+		if (!stopMediaPipeLoop) {
+			await mediaHands.send({ image: videoEl });
+		}
 
-		setTimeout(render, 1000 / 12);
+		setTimeout(loopMediaPipeSend, 1000 / 24);
+	};
+
+	const initVulgarityFilter = () => {
+		vulgarityFilterContainer = new PIXI.Container();
+		PixiApp.stage.addChild(vulgarityFilterContainer);
+
+		vulgarityFilterContainer.filterArea = PixiApp.renderer.screen;
+		shaderVulgarityFilter = new PIXI.Filter(null, colorShaderFrag, {
+			u_time: 0.0,
+			u_resolution: [vulgarityFilterContainer.filterArea.width, vulgarityFilterContainer.filterArea.height, 1.0],
+			u_normal_bg: [0.733, 0.949, 0.709],
+			u_progress: 0.0,
+		});
+		vulgarityFilterContainer.filters = [shaderVulgarityFilter];
 	};
 
 	const initCanvas = () => {
@@ -289,18 +301,22 @@
 			resizeTo: window,
 		});
 
-		imageContainer = new PIXI.Container();
-		handContainer = new PIXI.Container();
-		PixiApp.stage.addChild(imageContainer);
-		PixiApp.stage.addChild(handContainer);
+		initVulgarityFilter();
 
-		// Pre-init container to draw hands in
-		mpHand = new PIXI.Graphics();
-		PixiApp.stage.addChild(mpHand);
-		
+		imageContainer = new PIXI.Container();
+		PixiApp.stage.addChild(imageContainer);
 
 		let pixiRender = () => {
 			PixiApp.renderer.render(PixiApp.stage);
+
+			if (stopMediaPipeLoop) {
+				shaderVulgarityFilter.uniforms.u_time += 0.004;
+				shaderVulgarityFilter.uniforms.u_progress = remap(shaderVulgarityFilter.uniforms.u_progress + 0.005, [0.0, 1.0], [0.0, 1.0], true);
+			} else if (!stopMediaPipeLoop && shaderVulgarityFilter.uniforms.u_progress <= 1.0 && shaderVulgarityFilter.uniforms.u_progress !== 0) {
+				shaderVulgarityFilter.uniforms.u_time += 0.004;
+				shaderVulgarityFilter.uniforms.u_progress = remap(shaderVulgarityFilter.uniforms.u_progress - 0.005, [0.0, 1.0], [0.0, 1.0], true);
+			}
+
 			window.requestAnimationFrame(pixiRender);
 		};
 		pixiRender();
@@ -309,10 +325,9 @@
 	onMount(() => {
 		initCanvas();
 		addFilterLayer();
-		addLeakingHand();
 		mediaHands.onResults(handleHandsResults);
 
-		render();
+		loopMediaPipeSend();
 	});
 </script>
 
@@ -336,10 +351,6 @@
 
 	img {
 		display: none;
-	}
-
-	aside {
-		position: absolute;
 	}
 
 	.main-canvas {
