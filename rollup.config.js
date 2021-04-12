@@ -4,6 +4,8 @@ import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
+import glslify from 'rollup-plugin-glslify';
+
 
 import preprocess from 'svelte-preprocess';
 
@@ -64,6 +66,13 @@ export default {
 			namedExports: {
                 "resource-loader": ["Resource"] // ADD THIS
 			}
+		}),
+		glslify({
+			// Undefined by default
+			exclude: 'node_modules/**',
+
+			// Compress shader by default using logic from rollup-plugin-glsl
+			compress: true
 		}),
 
 		// In dev mode, call `npm run start` once
