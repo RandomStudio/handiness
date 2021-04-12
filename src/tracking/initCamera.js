@@ -17,11 +17,11 @@ const initCamera = (videoEl) => {
 			.getUserMedia(constraints)
 			.then(stream => {
 				videoEl.srcObject = stream;
-				return { succes: true };
+				return { success: true };
 			})
 			.catch(error => {
 				console.error(error);
-				return { succes: false };
+				return { success: false };
 			});
 	}
 }

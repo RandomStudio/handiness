@@ -6,10 +6,22 @@
 
 	export let handleStartVideo;
 
-	let hasExperienceStarted = false;
 	let isWebGL2Supported;
-
+	let hasExperienceStarted = false;
 	let hasLoadingError = false;
+
+	let handImage;
+	let hasHandImageLoaded = false;
+	let canStartVideo = true;
+
+	$: handImage,
+		(() => {
+			if (handImage) {
+				handImage.onload = () => {
+					hasHandImageLoaded = true;
+				};
+			}
+		})();
 
 	hasDetectedFirstHand.subscribe((value) => {
 		if (value && !hasExperienceStarted) {
@@ -25,18 +37,14 @@
 		isWebGL2Supported = !!document.createElement('canvas').getContext('webgl2');
 	});
 
-	const startVideo = () => {
-		handleStartVideo();
-
+	const startVideo = async () => {
 		isLoaderFlow.set(true);
+		canStartVideo = await handleStartVideo();
 	};
 </script>
 
 {#if !hasExperienceStarted}
 	<div class="container" out:fade>
-		{#if !$isLoaderFlow}
-			<div out:fade={{ duration: 300 }} class="background" />
-		{/if}
 		<div class="backdrop" />
 
 		<section>
@@ -63,22 +71,26 @@
 				</div>
 			{:else}
 				<div transition:fade={{ delay: 100 }} class="container-cta-loader">
-					{#if $loadedFilesCount !== 7}
+					{#if $loadedFilesCount !== 7 && canStartVideo}
 						<p out:fade class="text-offset">
 							Loading...
 							<br />
 							{$loadedFilesCount}/7
 						</p>
-					{:else if hasLoadingError}
+					{:else if hasLoadingError || !canStartVideo}
 						<p transition:fade class="text-offset">
 							Something seems to have went wrong during initialization...<br />Please refresh the page
 						</p>
 					{:else}
 						<div transition:fade class="container-cta">
-							<picture>
+							<picture class:hasHandImageLoaded>
 								<source srcset="/high-five.webp" type="image/webp" />
 								<source srcset="/high-five.jpg" type="image/jpeg" />
-								<img src="/high-five.jpg" alt="Illustration of two hands in the motion of a high five" />
+								<img
+									src="/high-five.jpg"
+									alt="Illustration of two hands in the motion of a high five"
+									bind:this={handImage}
+								/>
 							</picture>
 							<p>Raise Your Hand in Front of the Webcam to Get Started</p>
 						</div>
@@ -90,7 +102,7 @@
 				<p>
 					We respect your data <br />
 					meaning <br />
-					None of it gets recorded, our lovely <u><i>anonymous</i></u> visitor
+					None of this gets recorded, our lovely <u><i>anonymous</i></u> visitor
 				</p>
 			</footer>
 		</section>
@@ -103,6 +115,7 @@
 		flex-flow: column;
 		align-items: center;
 		height: 100%;
+		width: 100%;
 	}
 
 	footer {
@@ -111,6 +124,15 @@
 
 		@media all and (min-width: 480px) {
 			font-size: var(--font-small);
+		}
+	}
+
+	picture {
+		opacity: 0;
+		transition: opacity 300ms linear;
+
+		&.hasHandImageLoaded {
+			opacity: 1;
 		}
 	}
 
@@ -139,22 +161,22 @@
 		opacity: 0.25;
 	}
 
-	.background {
-		position: absolute;
-		top: 0;
-		left: 0;
-		z-index: -1;
-		height: 100%;
-		width: 100%;
-		background-image: url('/background.jpg');
-		background-size: cover;
-		background-position: center;
-	}
-
 	.container-intro {
 		color: var(--color-white);
-
 		padding: 13.2rem 12px 0;
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: -1;
+			height: 100%;
+			width: 100%;
+			background-image: url('/background.jpg');
+			background-size: cover;
+			background-position: center;
+		}
 
 		@media all and (min-width: 480px) {
 			padding: 30vh 24px 0;
@@ -182,10 +204,6 @@
 			width: 100%;
 			color: var(--color-black);
 			background: var(--color-white);
-
-			&:focus {
-				outline: none;
-			}
 		}
 	}
 
@@ -193,19 +211,22 @@
 		display: flex;
 		flex-flow: column nowrap;
 		align-items: center;
-		padding: 13.2rem 12px 0;
+		padding: 5.4rem 12px 0;
 		color: var(--color-black);
 		height: 100%;
-
-		& > * {
-			position: absolute;
-		}
+		width: 100%;
 
 		@media all and (min-width: 480px) {
 			padding: 18vh 24px 0;
+
+			& > * {
+				position: absolute;
+			}
 		}
 
 		.text-offset {
+			padding: 7.8rem 0 0;
+
 			@media all and (min-width: 480px) {
 				padding: 25vh 0 0;
 			}
@@ -215,15 +236,19 @@
 	.container-cta {
 		max-height: 50vh;
 		height: 100%;
+		padding: 12px;
 
 		@media all and (min-width: 480px) {
 			max-height: 35vh;
+			padding: 24px;
 		}
 
 		img,
 		source {
 			height: 100%;
+			width: 100%;
 			margin-bottom: 2rem;
+			object-fit: contain;
 		}
 	}
 

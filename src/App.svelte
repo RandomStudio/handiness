@@ -1,6 +1,4 @@
 <script>
-	import { onMount } from 'svelte';
-
 	import initMediaHands from './tracking/initMediaHands';
 	import initCamera from './tracking/initCamera';
 
@@ -22,31 +20,41 @@
 	const params = new URLSearchParams(window.location.search);
 	const showSubwayCollection = params.get('subway');
 
-	// let imageHostURL = showSubwayCollection ? '/subwayhands-images' : 'https://doppelhand.s3.eu-central-1.amazonaws.com/images';
 	let imageHostURL = showSubwayCollection ? '/subwayhands-images' : '/images';
 
 	const startVideo = async () => {
-		const handsData = showSubwayCollection ? '/subwayhands.json' : '/output.json';
-		const data = await fetch(handsData);
-		dataset = await data.json();
-		loadedFilesCount.increment();
+		const res = await initCamera(videoEl);
 
-		const easterEggData = await fetch('/easteregg.json');
-		datasetEasterEgg = await easterEggData.json();
-		loadedFilesCount.increment();
+		if (res?.success) {
+			videoEl.play().then(async () => {
+				mediaHands = initMediaHands();
 
-		buildVPTree(dataset.map((data) => data.landmarks));
+				const handsData = showSubwayCollection ? '/subwayhands.json' : '/output.json';
+				const data = await fetch(handsData);
+				dataset = await data.json();
+				loadedFilesCount.increment();
 
-		await initCamera(videoEl);
-		videoEl.play();
-		mediaHands = initMediaHands();
+				const easterEggData = await fetch('/easteregg.json');
+				datasetEasterEgg = await easterEggData.json();
+				loadedFilesCount.increment();
+
+				buildVPTree(dataset.map((data) => data.landmarks));
+			});
+
+			return true;
+		} else {
+			return false;
+		}
 	};
 </script>
 
 <main>
-	<div class={`about ${$isLoaderFlow && !isAboutOpen ? '' : 'is-white'}`} on:click={() => (isAboutOpen = !isAboutOpen)}>
+	<button
+		class={`about ${$isLoaderFlow && !isAboutOpen ? '' : 'is-white'}`}
+		on:click={() => (isAboutOpen = !isAboutOpen)}
+	>
 		<span>{isAboutOpen ? 'X' : '?'}</span>
-	</div>
+	</button>
 
 	{#if isAboutOpen}
 		<About />
@@ -85,6 +93,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		background-color: transparent;
 		height: 1.6rem;
 		width: 1.6rem;
 		border: 2px solid var(--color-black);
@@ -94,7 +103,7 @@
 		color: var(--color-black);
 		z-index: 10;
 		cursor: pointer;
-		user-select:none;
+		user-select: none;
 
 		&.is-white {
 			border-color: var(--color-white);
