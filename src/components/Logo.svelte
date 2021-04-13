@@ -13,15 +13,23 @@
 <style lang="scss">
 	svg {
 		position: fixed;
-		right: 12px;
-		bottom: 12px;
+		left: 12px;
+		top: 12px;
 		z-index: 100; // Always on top
+		width: 120px;
+
+		path {
+			transition: fill 300ms;
+		}
 
 		&.is-white path {
 			fill: var(--color-white);
 		}
 
 		@media all and (min-width: 480px) {
+			width: 180px;
+			top: initial;
+			left: initial;
 			right: 24px;
 			bottom: 12px;
 		}
