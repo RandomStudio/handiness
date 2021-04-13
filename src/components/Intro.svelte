@@ -45,25 +45,20 @@
 
 {#if !hasExperienceStarted}
 	<div class="container" out:fade>
-		<div class="backdrop" />
 
 		<section>
 			{#if !$isLoaderFlow}
 				<div out:fade={{ duration: 300 }} class="container-intro">
-					<h1>Mirror Hand</h1>
+					<h1>Second Hand</h1>
 					<p>
-						Hand Gesture Image Discovery
-
 						{#if isWebGL2Supported}
-							<br />
-							We'll need camera access for this though
+							We'll need camera access for this.
 						{/if}
 					</p>
 
 					{#if !isWebGL2Supported}
 						<p class="unsupported">
-							“Sorry your browser does not support WebGL2. If you are on a iPhone, then... I am so sorry, lets try to
-							meet on Firefox/Chrome”
+							Sorry your browser does not support WebGL2. Please try again with Firefox/Chrome desktop or Android.
 						</p>
 					{:else}
 						<button on:click={startVideo}>Let's do this!</button>
@@ -101,8 +96,7 @@
 			<footer style="color: {$isLoaderFlow ? 'var(--color-black)' : 'var(--color-white)'}">
 				<p>
 					We respect your data <br />
-					meaning <br />
-					None of this gets recorded, our lovely <u><i>anonymous</i></u> visitor
+					None of this gets recorded
 				</p>
 			</footer>
 		</section>
@@ -150,16 +144,6 @@
 		text-align: center;
 	}
 
-	.backdrop {
-		position: absolute;
-		top: 0;
-		left: 0;
-		z-index: -1;
-		height: 100%;
-		width: 100%;
-		background: var(--color-black);
-		opacity: 0.25;
-	}
 
 	.container-intro {
 		color: var(--color-white);
@@ -190,8 +174,9 @@
 				font-size: var(--font-large);
 			}
 		}
+		
 		p {
-			margin-bottom: 1.6rem;
+			margin-bottom: 3.2rem;
 		}
 
 		button {

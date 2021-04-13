@@ -3,7 +3,7 @@
 </script>
 
 <div transition:fade={{ duration: 150 }}>
-	<p>OOOPS! We've lost your hand</p>
+	<p>Oops! We've lost your hand.</p>
 </div>
 
 <style lang="scss">
@@ -22,8 +22,8 @@
 			left: 0;
 			width: 100%;
 			height: 100%;
-			box-shadow: inset 0 0 20rem 0 rgba(255, 255, 255, .5);
-			background-color: rgba(0, 0, 0, .85);
+			box-shadow: inset 0 0 20rem 0 rgba(255, 255, 255, 0.5);
+			background-color: rgba(0, 0, 0, 0.85);
 			filter: blur(32px);
 		}
 
@@ -34,7 +34,6 @@
 				display: none;
 			}
 		}
-		
 	}
 
 	p {

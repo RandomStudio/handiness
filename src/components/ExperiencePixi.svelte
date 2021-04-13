@@ -92,7 +92,6 @@
 		const closestIndex = closestMatch.i;
 
 		const hasDetectedVulgarity = vulgarityDetection(landmarks);
-		hasFoundVulgarity = hasDetectedVulgarity;
 
 		if (closestIndex || hasDetectedVulgarity) {
 			let closestHand;
@@ -297,7 +296,7 @@
 		PixiApp = new PIXI.Application({
 			view: canvasEl,
 			antialias: true, // default: false
-			backgroundColor: 0xbbf2b5,
+			backgroundColor: 0x9ac395,
 			resizeTo: window,
 		});
 

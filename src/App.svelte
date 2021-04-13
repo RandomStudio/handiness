@@ -9,6 +9,7 @@
 	import Intro from './components/Intro.svelte';
 	import ExperiencePixi from './components/ExperiencePixi.svelte';
 	import About from './components/About.svelte';
+	import Logo from './components/Logo.svelte';
 
 	let videoEl;
 	let mediaHands;
@@ -53,7 +54,14 @@
 		class={`about ${$isLoaderFlow && !isAboutOpen ? '' : 'is-white'}`}
 		on:click={() => (isAboutOpen = !isAboutOpen)}
 	>
-		<span>{isAboutOpen ? 'X' : '?'}</span>
+		<span>
+			{#if isAboutOpen}
+				&times;
+			{:else}
+				?
+			{/if}
+		</span>
+		
 	</button>
 
 	{#if isAboutOpen}
@@ -70,6 +78,8 @@
 
 	<!-- svelte-ignore a11y-media-has-caption -->
 	<video bind:this={videoEl} playsinline />
+
+	<Logo shouldBeWhite={!$isLoaderFlow} />
 </main>
 
 <style lang="scss">
@@ -78,7 +88,7 @@
 		width: 100%;
 		height: 100%;
 		margin: 0;
-		background: #bbf2b5;
+		background: #9ac395;
 	}
 
 	video {
