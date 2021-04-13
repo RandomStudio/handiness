@@ -2,12 +2,17 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 
-	import { hasDetectedFirstHand, hasIntroTransitionEnded, isLoaderFlow, loadedFilesCount } from '../stores';
+	import {
+		hasExperienceStarted,
+		hasDetectedFirstHand,
+		hasIntroTransitionEnded,
+		isLoaderFlow,
+		loadedFilesCount,
+	} from '../stores';
 
 	export let handleStartVideo;
 
 	let isWebGL2Supported;
-	let hasExperienceStarted = false;
 	let hasLoadingError = false;
 
 	let handImage;
@@ -24,12 +29,12 @@
 		})();
 
 	hasDetectedFirstHand.subscribe((value) => {
-		if (value && !hasExperienceStarted) {
-			setTimeout(() => {
-				hasIntroTransitionEnded.set(true);
-				isLoaderFlow.set(false);
-				hasExperienceStarted = true;
-			}, 300);
+		if (value && !$hasExperienceStarted) {
+			// setTimeout(() => {
+			hasIntroTransitionEnded.set(true);
+			isLoaderFlow.set(false);
+			hasExperienceStarted.set(true);
+			// }, 300);
 		}
 	});
 
@@ -43,9 +48,8 @@
 	};
 </script>
 
-{#if !hasExperienceStarted}
+{#if !$hasExperienceStarted}
 	<div class="container" out:fade>
-
 		<section>
 			{#if !$isLoaderFlow}
 				<div out:fade={{ duration: 300 }} class="container-intro">
@@ -58,10 +62,10 @@
 
 					{#if !isWebGL2Supported}
 						<p class="unsupported">
-							Sorry your browser does not support WebGL2. Please try again with Firefox/Chrome desktop or Android.
+							Sorry your browser does not support WebGL2 Please try again with Firefox/Chrome desktop or Android
 						</p>
 					{:else}
-						<button on:click={startVideo}>Let's do this!</button>
+						<button on:click={startVideo}>Start Experience!</button>
 					{/if}
 				</div>
 			{:else}
@@ -80,23 +84,23 @@
 						<div transition:fade class="container-cta">
 							<picture class:hasHandImageLoaded>
 								<source srcset="/high-five.webp" type="image/webp" />
-								<source srcset="/high-five.jpg" type="image/jpeg" />
+								<source srcset="/high-five.png" type="image/png" />
 								<img
-									src="/high-five.jpg"
+									src="/high-five.png"
 									alt="Illustration of two hands in the motion of a high five"
 									bind:this={handImage}
 								/>
 							</picture>
-							<p>Raise Your Hand in Front of the Webcam to Get Started</p>
+							<p>Raise your hand in front of the webcam to get started</p>
 						</div>
 					{/if}
 				</div>
 			{/if}
 
-			<footer style="color: {$isLoaderFlow ? 'var(--color-black)' : 'var(--color-white)'}">
+			<footer>
 				<p>
 					We respect your data <br />
-					None of this gets recorded
+					None of it gets recorded.
 				</p>
 			</footer>
 		</section>
@@ -110,6 +114,7 @@
 		align-items: center;
 		height: 100%;
 		width: 100%;
+		color: var(--color-white);
 	}
 
 	footer {
@@ -144,23 +149,9 @@
 		text-align: center;
 	}
 
-
 	.container-intro {
 		color: var(--color-white);
 		padding: 13.2rem 12px 0;
-
-		&::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			z-index: -1;
-			height: 100%;
-			width: 100%;
-			background-image: url('/background.jpg');
-			background-size: cover;
-			background-position: center;
-		}
 
 		@media all and (min-width: 480px) {
 			padding: 30vh 24px 0;
@@ -174,7 +165,7 @@
 				font-size: var(--font-large);
 			}
 		}
-		
+
 		p {
 			margin-bottom: 3.2rem;
 		}
@@ -197,7 +188,7 @@
 		flex-flow: column nowrap;
 		align-items: center;
 		padding: 5.4rem 12px 0;
-		color: var(--color-black);
+		color: var(--color-white);
 		height: 100%;
 		width: 100%;
 

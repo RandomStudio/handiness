@@ -5,15 +5,11 @@
 <section transition:fade={{ duration: 150 }} class="about">
 	<section class="about-content">
 		<div class="about-text">
-			<p>
-				Body language communicates and your hand gestures speak for you.
-			</p>
+			<p>Body language communicates and your hand gestures speak for you.</p>
 			<br />
 
 			<p>
-				<a href="https://random.studio" class ='underline'>
-					Random Studio 2021
-				</a> 
+				<a href="https://random.studio" class="underline"> Random Studio 2021 </a>
 			</p>
 			<br />
 
@@ -23,7 +19,9 @@
 				<a href="https://cocodataset.org/">COCO</a><br />
 				<a href="http://human-pose.mpi-inf.mpg.de/">MPII</a><br />
 				<a href="https://github.com/fpirsch/vptree.js">VPTREE algorithm</a><br />
-				<a href="https://medium.com/random-studio/creative-compression-18179149f19d">Random Studio's Creative Compression</a>.
+				<a href="https://medium.com/random-studio/creative-compression-18179149f19d"
+					>Random Studio's Creative Compression</a
+				>.
 			</p>
 			<br />
 		</div>
@@ -41,7 +39,6 @@
 		border-bottom: 2px solid var(--color-white);
 		padding: 10px 0 10px;
 		text-decoration: none;
-
 	}
 	.about {
 		position: absolute;
@@ -96,8 +93,9 @@
 
 	.about-content {
 		max-width: 56rem;
-		
-		::-moz-selection { /* Code for Firefox */
+
+		::-moz-selection {
+			/* Code for Firefox */
 			color: red;
 			background: yellow;
 		}
@@ -124,23 +122,6 @@
 			border-bottom: none;
 			padding-right: 24px;
 			width: 100%;
-		}
-	}
-
-	.about-social {
-		ul {
-			padding: 0;
-			list-style: none;
-			font-size: var(--font-normal);
-		}
-
-		@media all and (min-width: 600px) {
-			// width: 25%;
-
-			ul {
-				font-size: var(--font-medium);
-				padding-left: 24px;
-			}
 		}
 	}
 </style>

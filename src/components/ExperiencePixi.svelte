@@ -2,15 +2,16 @@
 	import { onMount } from 'svelte';
 	import anime from 'animejs/lib/anime.es.js';
 	import * as PIXI from 'pixi.js';
-	import { remap } from '@anselan/maprange'
+	import { remap } from '@anselan/maprange';
 
 	import { findMostSimilarMatch } from '../utils/vptree';
 	import { vulgarityDetection } from '../utils/handUtils.js';
-	import { hasDetectedFirstHand, hasIntroTransitionEnded } from '../stores';
+	import { isLoaderFlow, hasDetectedFirstHand, hasIntroTransitionEnded, hasExperienceStarted } from '../stores';
 
 	import colorShaderFrag from '../shaders/colorAnimating.glsl';
 
 	import HandLostPrompt from './HandLostPrompt.svelte';
+	import { animateSingleMask, animateMaskTransition, getScaleToBoundaries } from '../utils/pixiHelpers';
 
 	export let videoEl;
 	export let mediaHands;
@@ -19,8 +20,6 @@
 	export let datasetEasterEgg;
 
 	let PixiApp;
-
-	let imageEl;
 	let canvasEl;
 
 	let imageContainer;
@@ -33,12 +32,10 @@
 	let stopMediaPipeLoop = false;
 
 	let displacementMaps = [
-		'/maps/dMap.jpg',
-		'/maps/dMap2.jpg',
-		'/maps/dSpots.jpg',
-		'/maps/dWave.jpg',
-		'/maps/dNoise.jpg',
+		// '/maps/dSpots.jpg',
 		'/maps/dDistortion.jpg',
+		'/maps/dRough.jpg',
+		'/maps/dDrapes.jpg',
 	];
 	let displacementSprites = [];
 	let displacementFilters = [];
@@ -171,62 +168,28 @@
 
 							imageContainer.children.forEach((image) => (image.alpha -= 0.1));
 
-							const randomFilter =
-								displacementFilters[
-									Math.floor(Math.random() * displacementFilters.length) % displacementFilters.length
-								];
-
-							const currentImageChild = imageContainer.children[imageContainer.children.length - 1];
-							const newImageChild = imageContainer.addChild(newImageSprite);
-
-							newImageSprite.alpha = 0;
-
-							const animDuration = 800;
-
-							const transitionTimeline = anime.timeline({
-								easing: 'easeOutExpo',
-								duration: animDuration,
-							});
-
-							transitionTimeline.add(
-								{
-									targets: randomFilter.scale,
-									x: Math.floor(Math.max(100, Math.random() * 800)),
-									y: Math.floor(Math.max(100, Math.random() * 800)),
-								},
-								0,
-							);
-
-							transitionTimeline.add(
-								{
-									targets: currentImageChild,
-									alpha: 0.75,
-								},
-								animDuration * 0.5,
-							);
-
-							transitionTimeline.add(
-								{
-									targets: newImageSprite,
-									alpha: [0, 1],
-								},
-								animDuration * 0.5,
-							);
-
-							transitionTimeline.add(
-								{
-									targets: randomFilter.scale,
-									y: 0.1,
-									x: 0.1,
-								},
-								animDuration * 0.75,
-							);
-
-							transitionTimeline.finished.then(() => {
-								isAnimating = false;
-							});
+							setAnimateNewImage();
 						}
 					});
+
+					function setAnimateNewImage() {
+						const randomFilter =
+							displacementFilters[Math.floor(Math.random() * displacementFilters.length) % displacementFilters.length];
+
+						const currentImageChild = imageContainer.children[imageContainer.children.length - 1];
+						const newImageChild = imageContainer.addChild(newImageSprite);
+
+						newImageSprite.alpha = 0;
+
+						animateMaskTransition({
+							displacementFilter: randomFilter,
+							initialImage: currentImageChild,
+							targetImage: newImageChild,
+							callback: () => {
+								isAnimating = false;
+							},
+						});
+					}
 				}
 			}
 		}
@@ -271,10 +234,14 @@
 	};
 
 	const loopMediaPipeSend = async () => {
-		if (!stopMediaPipeLoop) {
-			await mediaHands.send({ image: videoEl });
+		if (mediaHands && !mediaHands?.initialized) {
+			mediaHands.initialized = true;
+			mediaHands.onResults(handleHandsResults);
 		}
 
+		if (mediaHands?.initialized && !stopMediaPipeLoop) {
+			await mediaHands.send({ image: videoEl });
+		}
 		setTimeout(loopMediaPipeSend, 1000 / 24);
 	};
 
@@ -308,32 +275,99 @@
 		let pixiRender = () => {
 			PixiApp.renderer.render(PixiApp.stage);
 
-			if (stopMediaPipeLoop) {
-				shaderVulgarityFilter.uniforms.u_time += 0.004;
-				shaderVulgarityFilter.uniforms.u_progress = remap(shaderVulgarityFilter.uniforms.u_progress + 0.005, [0.0, 1.0], [0.0, 1.0], true);
-			} else if (!stopMediaPipeLoop && shaderVulgarityFilter.uniforms.u_progress <= 1.0 && shaderVulgarityFilter.uniforms.u_progress !== 0) {
-				shaderVulgarityFilter.uniforms.u_time += 0.004;
-				shaderVulgarityFilter.uniforms.u_progress = remap(shaderVulgarityFilter.uniforms.u_progress - 0.005, [0.0, 1.0], [0.0, 1.0], true);
+			if (!$hasExperienceStarted && !$isLoaderFlow) {
+				animateIntroSlideshow();
+			} else {
+				if (stopMediaPipeLoop) {
+					shaderVulgarityFilter.uniforms.u_time += 0.004;
+					shaderVulgarityFilter.uniforms.u_progress = remap(
+						shaderVulgarityFilter.uniforms.u_progress + 0.005,
+						[0.0, 1.0],
+						[0.0, 1.0],
+						true,
+					);
+				} else if (
+					!stopMediaPipeLoop &&
+					shaderVulgarityFilter.uniforms.u_progress <= 1.0 &&
+					shaderVulgarityFilter.uniforms.u_progress !== 0
+				) {
+					shaderVulgarityFilter.uniforms.u_time += 0.004;
+					shaderVulgarityFilter.uniforms.u_progress = remap(
+						shaderVulgarityFilter.uniforms.u_progress - 0.005,
+						[0.0, 1.0],
+						[0.0, 1.0],
+						true,
+					);
+				}
 			}
 
 			window.requestAnimationFrame(pixiRender);
 		};
+
 		pixiRender();
+	};
+
+	const animateIntroSlideshow = () => {
+		if (!isAnimating && displacementFilters?.length) {
+			isAnimating = true;
+
+			const randomFilter = displacementFilters[displacementFilters.length - 1];
+			const random = Math.floor(Math.random() * 10) + 1;
+			const newTexture = PIXI.Texture.from(`/images/${random}.jpg`);
+
+			const newImageSprite = new PIXI.Sprite(newTexture);
+
+			// Scaling does not affect coordinate system
+			// Continue by assuming moving with the original sizing and not after scale dimensions
+			newImageSprite.anchor.set(0.5);
+
+			newTexture.on('update', onTextureUpdate);
+
+			function setAnimateNewImage() {
+				const newImageChild = imageContainer.addChild(newImageSprite);
+				newImageSprite.x = PixiApp.screen.width / 2;
+				newImageSprite.y = PixiApp.screen.height / 2;
+
+				const scaleAmount = getScaleToBoundaries(newTexture.frame, PixiApp.screen);
+				newImageSprite.scale.set(scaleAmount, scaleAmount);
+
+				newImageSprite.alpha = 0;
+
+				animateSingleMask({
+					displacementFilter: randomFilter,
+					targetImage: newImageChild,
+					duration: 4500,
+
+					scaleTargets: {
+						x: 150,
+						y: 150,
+					},
+					callback: () => {
+						isAnimating = false;
+					},
+				});
+			}
+
+			// Is 1 if it has not been loaded in memory yet
+			if (newTexture.frame.width > 1) {
+				setAnimateNewImage();
+			}
+
+			function onTextureUpdate() {
+				setAnimateNewImage();
+			}
+		}
 	};
 
 	onMount(() => {
 		initCanvas();
 		addFilterLayer();
-		mediaHands.onResults(handleHandsResults);
 
 		loopMediaPipeSend();
 	});
 </script>
 
 <div class="container">
-	<!-- svelte-ignore a11y-missing-attribute -->
-	<img bind:this={imageEl} src={activeImage} />
-
 	<canvas class="main-canvas" bind:this={canvasEl} />
 
 	{#if isHandPromptVisible}
@@ -346,10 +380,6 @@
 		position: relative;
 		width: 100%;
 		height: 100%;
-	}
-
-	img {
-		display: none;
 	}
 
 	.main-canvas {

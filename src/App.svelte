@@ -50,10 +50,7 @@
 </script>
 
 <main>
-	<button
-		class={`about ${$isLoaderFlow && !isAboutOpen ? '' : 'is-white'}`}
-		on:click={() => (isAboutOpen = !isAboutOpen)}
-	>
+	<button class="about" on:click={() => (isAboutOpen = !isAboutOpen)}>
 		<span>
 			{#if isAboutOpen}
 				&times;
@@ -61,16 +58,13 @@
 				?
 			{/if}
 		</span>
-		
 	</button>
 
 	{#if isAboutOpen}
 		<About />
 	{/if}
 
-	{#if mediaHands}
-		<ExperiencePixi {videoEl} {mediaHands} {dataset} {datasetEasterEgg} {imageHostURL} />
-	{/if}
+	<ExperiencePixi {videoEl} {mediaHands} {dataset} {datasetEasterEgg} {imageHostURL} />
 
 	{#if !mediaHands || !$hasExperienceStarted}
 		<Intro handleStartVideo={startVideo} />
@@ -79,7 +73,7 @@
 	<!-- svelte-ignore a11y-media-has-caption -->
 	<video bind:this={videoEl} playsinline />
 
-	<Logo shouldBeWhite={!$isLoaderFlow} />
+	<Logo />
 </main>
 
 <style lang="scss">
@@ -106,19 +100,14 @@
 		background-color: transparent;
 		height: 1.6rem;
 		width: 1.6rem;
-		border: 2px solid var(--color-black);
+		border: 2px solid var(--color-white);
 		border-radius: 2rem;
 		font-size: var(--font-normal);
 		font-weight: bolder;
-		color: var(--color-black);
+		color: var(--color-white);
 		z-index: 10;
 		cursor: pointer;
 		user-select: none;
-
-		&.is-white {
-			border-color: var(--color-white);
-			color: var(--color-white);
-		}
 
 		@media all and (min-width: 480px) {
 			top: 24px;
