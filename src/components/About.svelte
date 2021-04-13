@@ -5,40 +5,44 @@
 <section transition:fade={{ duration: 150 }} class="about">
 	<section class="about-content">
 		<div class="about-text">
-			<p><u>About</u></p>
 			<p>
-				This small project is a playful research into what can be achieved with realtime hand/finger gesture recognition
-				in the Web Browser.
+				Body language communicates and your hand gestures speak for you.
 			</p>
 			<br />
 
-			<p><u>Techie Stuff</u></p>
 			<p>
-				We decided to try using Google’s Mediapipe as a way to preprocess two datasets of images containing people and
-				detect hand positions within those images. Afterwards we used the coordinates of keypoints in those hands to
-				compare to the hand position/direction of the user using the VPTREE algorithm. Additionally we have added the
-				functionality to preview these images using our in-house created image compression system, you can read more
-				about it here.
+				<a href="https://random.studio" class ='underline'>
+					Random Studio 2021
+				</a> 
 			</p>
 			<br />
 
-			<p><u>Stats</u></p>
-			<p>6000 images from the COCO dataset 3000 images from the MPII dataset</p>
+			<p>
+				Technology used: <br />
+				<a href="https://mediapipe.dev/">Mediapipe</a> <br />
+				<a href="https://cocodataset.org/">COCO</a><br />
+				<a href="http://human-pose.mpi-inf.mpg.de/">MPII</a><br />
+				<a href="https://github.com/fpirsch/vptree.js">VPTREE algorithm</a><br />
+				<a href="https://medium.com/random-studio/creative-compression-18179149f19d">Random Studio's Creative Compression</a>.
+			</p>
 			<br />
-
-			<p><u>References</u></p>
-			<p>COCO Dataset MPII Dataset VPTREE algorithm</p>
-		</div>
-		<div class="about-social">
-			<ul>
-				<li><a href="mailto:hello@random.studio">CONTACT</a></li>
-				<li><a href="https://www.instagram.com/random_studio/">INSTAGRAM</a></li>
-			</ul>
 		</div>
 	</section>
 </section>
 
 <style lang="scss">
+	a {
+		text-decoration: underline;
+		color: var(--color-white);
+	}
+
+	.underline {
+		border-top: 2px solid var(--color-white);
+		border-bottom: 2px solid var(--color-white);
+		padding: 10px 0 10px;
+		text-decoration: none;
+
+	}
 	.about {
 		position: absolute;
 		top: 0;
@@ -62,9 +66,8 @@
 			display: none;
 		}
 
-		
 		&::before {
-			content: "";
+			content: '';
 			position: absolute;
 			top: 0;
 			left: 0;
@@ -72,8 +75,8 @@
 			height: 100%;
 			z-index: -1;
 
-			box-shadow: inset 0 0 20rem 0 rgba(255, 255, 255, .5);
-			background-color: rgba(0, 0, 0, .85);
+			box-shadow: inset 0 0 20rem 0 rgba(255, 255, 255, 0.5);
+			background-color: rgba(0, 0, 0, 0.85);
 			filter: blur(32px);
 		}
 
@@ -84,54 +87,59 @@
 				display: none;
 			}
 		}
-		
 
-		@media all and (min-width: 480px) {
-			padding: 18vh 24px 0;
+		@media all and (min-width: 600px) {
+			padding: 0;
 			font-size: var(--font-normal);
 		}
 	}
 
 	.about-content {
-		max-width: 64rem;
+		max-width: 56rem;
 		
-		@media all and (min-width: 480px) {
+		::-moz-selection { /* Code for Firefox */
+			color: red;
+			background: yellow;
+		}
+
+		::selection {
+			color: red;
+			background: yellow;
+		}
+
+		@media all and (min-width: 600px) {
 			display: flex;
-			margin: 0 auto;
+			margin: auto;
+			padding: 0 24px;
 			width: 100%;
 		}
 	}
 
 	.about-text {
 		display: inline-block;
-		border-bottom: 2px solid var(--color-white);
+		/* border-bottom: 2px solid var(--color-white); */
 		padding-bottom: 1rem;
 
-		@media all and (min-width: 480px) {
+		@media all and (min-width: 600px) {
 			border-bottom: none;
-			border-right: 2px solid var(--color-white);
-			padding-right: 2.4rem;
-			width: 75%;
+			padding-right: 24px;
+			width: 100%;
 		}
 	}
+
 	.about-social {
 		ul {
 			padding: 0;
 			list-style: none;
-			font-size: var(--font-medium);
-			text-decoration: none;
-			li > a {
-				text-decoration: none;
-				color: var(--color-white);
-			}
+			font-size: var(--font-normal);
 		}
 
-		@media all and (min-width: 480px) {
-			width: 25%;
+		@media all and (min-width: 600px) {
+			// width: 25%;
 
 			ul {
 				font-size: var(--font-medium);
-				padding: 0 0 0 2.4rem;
+				padding-left: 24px;
 			}
 		}
 	}
