@@ -1,6 +1,5 @@
 <script>
 	import { onMount } from 'svelte';
-	import anime from 'animejs/lib/anime.es.js';
 	import * as PIXI from 'pixi.js';
 	import { remap } from '@anselan/maprange';
 
@@ -32,7 +31,6 @@
 	let stopMediaPipeLoop = false;
 
 	let displacementMaps = [
-		// '/maps/dSpots.jpg',
 		'/maps/dDistortion.jpg',
 		'/maps/dRough.jpg',
 		'/maps/dDrapes.jpg',

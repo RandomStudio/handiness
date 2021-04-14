@@ -5,7 +5,7 @@
 <section transition:fade={{ duration: 150 }} class="about">
 	<section class="about-content">
 		<div class="about-text">
-			<p>Body language communicates and your hand gestures speak for you.</p>
+			<p>Body language communicates and your hand gestures speak for you</p>
 			<br />
 
 			<p>
@@ -21,7 +21,7 @@
 				<a href="https://github.com/fpirsch/vptree.js">VPTREE algorithm</a><br />
 				<a href="https://medium.com/random-studio/creative-compression-18179149f19d"
 					>Random Studio's Creative Compression</a
-				>.
+				>
 			</p>
 			<br />
 		</div>

@@ -48,67 +48,66 @@
 	};
 </script>
 
-<!-- {#if !$hasExperienceStarted} -->
-	<div class="container" out:fade>
-		<section>
-			{#if !$isLoaderFlow && !$hasExperienceStarted}
-				<div out:fade={{ duration: 300 }} class="container-intro">
-					<h1>Second Hand</h1>
-					<p>
-						Hand Gesture Image Discovery
-
-						{#if isWebGL2Supported}
-							<br />
-							We'll need camera access for this.
-						{/if}
-					</p>
-
-					{#if !isWebGL2Supported}
-						<p class="unsupported">
-							Sorry your browser does not support WebGL2 Please try again with Firefox/Chrome desktop or Android
-						</p>
-					{:else}
-						<button on:click={startVideo}>Start Experience!</button>
-					{/if}
-				</div>
-			{:else}
-				<div in:fade={{ delay: 100 }} out:fade class="container-cta-loader">
-					{#if $loadedFilesCount !== 7 && canStartVideo}
-						<p out:fade class="text-offset">
-							Loading...
-							<br />
-							{$loadedFilesCount}/7
-						</p>
-					{:else if hasLoadingError || !canStartVideo}
-						<p transition:fade class="text-offset">
-							Something seems to have went wrong during initialization...<br />Please refresh the page
-						</p>
-					{:else}
-						<div transition:fade class="container-cta">
-							<picture class:hasHandImageLoaded>
-								<source srcset="/high-five.webp" type="image/webp" />
-								<source srcset="/high-five.png" type="image/png" />
-								<img
-									src="/high-five.png"
-									alt="Illustration of two hands in the motion of a high five"
-									bind:this={handImage}
-								/>
-							</picture>
-							<p>Raise your hand in front of the webcam to get started</p>
-						</div>
-					{/if}
-				</div>
-			{/if}
-
-			<footer>
+<div class="container" out:fade>
+	<section>
+		{#if !$isLoaderFlow && !$hasExperienceStarted}
+			<div out:fade={{ duration: 300 }} class="container-intro">
+				<h1>Second Hand</h1>
 				<p>
-					We respect your data <br />
-					None of it gets recorded.
+					Hand Gesture Image Discovery
+
+					{#if isWebGL2Supported}
+						<br />
+						We'll need camera access for this
+					{/if}
 				</p>
-			</footer>
-		</section>
-	</div>
-<!-- {/if} -->
+
+				{#if !isWebGL2Supported}
+					<p class="unsupported">
+						Sorry your browser does not support WebGL2 Please try again with Firefox/Chrome desktop or Android
+					</p>
+				{:else}
+					<button on:click={startVideo}>Start Experience!</button>
+				{/if}
+			</div>
+		{:else}
+			<div in:fade={{ delay: 100 }} out:fade class="container-cta-loader">
+				<!-- 7 Files in total BUT due to the unmounting + animation the counter will stop shortly at 6 -->
+				{#if $loadedFilesCount !== 7 && canStartVideo}
+					<p out:fade class="text-offset">
+						Loading...
+						<br />
+						{$loadedFilesCount}/7
+					</p>
+				{:else if hasLoadingError || !canStartVideo}
+					<p transition:fade class="text-offset">
+						Something seems to have went wrong during initialization...<br />Please refresh the page
+					</p>
+				{:else}
+					<div transition:fade class="container-cta">
+						<picture class:hasHandImageLoaded>
+							<source srcset="/high-five.webp" type="image/webp" />
+							<source srcset="/high-five.png" type="image/png" />
+							<img
+								src="/high-five.png"
+								alt="Illustration of two hands in the motion of a high five"
+								bind:this={handImage}
+							/>
+						</picture>
+						<p>Raise your hand in front of your webcam to get started</p>
+					</div>
+				{/if}
+			</div>
+		{/if}
+
+		<footer>
+			<p>
+				We respect your data <br />
+				None of it gets recorded
+			</p>
+		</footer>
+	</section>
+</div>
 
 <style lang="scss">
 	section {
