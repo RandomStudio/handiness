@@ -16,9 +16,9 @@
 			<p>
 				Technology used: <br />
 				<a href="https://mediapipe.dev/">Mediapipe</a> <br />
-				<a href="https://cocodataset.org/">COCO</a><br />
-				<a href="http://human-pose.mpi-inf.mpg.de/">MPII</a><br />
 				<a href="https://github.com/fpirsch/vptree.js">VPTREE algorithm</a><br />
+				<a href="https://cocodataset.org/">COCO dataset</a><br />
+				<a href="http://human-pose.mpi-inf.mpg.de/">MPII dataset</a><br />
 				<a href="https://medium.com/random-studio/creative-compression-18179149f19d"
 					>Random Studio's Creative Compression</a
 				>

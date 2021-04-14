@@ -20,7 +20,7 @@
 			fill: var(--color-white);
 		}
 
-		@media all and (min-width: 480px) {
+		@media all and (min-width: 560px) {
 			width: 180px;
 			top: initial;
 			left: initial;

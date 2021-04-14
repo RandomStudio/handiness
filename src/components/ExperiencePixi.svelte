@@ -232,6 +232,8 @@
 	};
 
 	const loopMediaPipeSend = async () => {
+		// When mediapipe has been set
+		// Initialize flag and provide callback once
 		if (mediaHands && !mediaHands?.initialized) {
 			mediaHands.initialized = true;
 			mediaHands.onResults(handleHandsResults);
@@ -241,68 +243,6 @@
 			await mediaHands.send({ image: videoEl });
 		}
 		setTimeout(loopMediaPipeSend, 1000 / 24);
-	};
-
-	const initVulgarityFilter = () => {
-		vulgarityFilterContainer = new PIXI.Container();
-		PixiApp.stage.addChild(vulgarityFilterContainer);
-
-		vulgarityFilterContainer.filterArea = PixiApp.renderer.screen;
-		shaderVulgarityFilter = new PIXI.Filter(null, colorShaderFrag, {
-			u_time: 0.0,
-			u_resolution: [vulgarityFilterContainer.filterArea.width, vulgarityFilterContainer.filterArea.height, 1.0],
-			u_normal_bg: [0.733, 0.949, 0.709],
-			u_progress: 0.0,
-		});
-		vulgarityFilterContainer.filters = [shaderVulgarityFilter];
-	};
-
-	const initCanvas = () => {
-		PixiApp = new PIXI.Application({
-			view: canvasEl,
-			antialias: true, // default: false
-			backgroundColor: 0x9ac395,
-			resizeTo: window,
-		});
-
-		initVulgarityFilter();
-
-		imageContainer = new PIXI.Container();
-		PixiApp.stage.addChild(imageContainer);
-
-		let pixiRender = () => {
-			PixiApp.renderer.render(PixiApp.stage);
-
-			if (!$hasExperienceStarted && !$isLoaderFlow) {
-				animateIntroSlideshow();
-			} else {
-				if (stopMediaPipeLoop) {
-					shaderVulgarityFilter.uniforms.u_time += 0.004;
-					shaderVulgarityFilter.uniforms.u_progress = remap(
-						shaderVulgarityFilter.uniforms.u_progress + 0.005,
-						[0.0, 1.0],
-						[0.0, 1.0],
-						true,
-					);
-				} else if (
-					!stopMediaPipeLoop &&
-					shaderVulgarityFilter.uniforms.u_progress <= 1.0 &&
-					shaderVulgarityFilter.uniforms.u_progress !== 0
-				) {
-					shaderVulgarityFilter.uniforms.u_time += 0.004;
-					shaderVulgarityFilter.uniforms.u_progress = remap(
-						shaderVulgarityFilter.uniforms.u_progress - 0.005,
-						[0.0, 1.0],
-						[0.0, 1.0],
-						true,
-					);
-				}
-			}
-
-			window.requestAnimationFrame(pixiRender);
-		};
-
-		pixiRender();
 	};
 
 	const animateIntroSlideshow = () => {
@@ -356,6 +296,69 @@
 			}
 		}
 	};
+
+	const initVulgarityFilter = () => {
+		vulgarityFilterContainer = new PIXI.Container();
+		PixiApp.stage.addChild(vulgarityFilterContainer);
+
+		vulgarityFilterContainer.filterArea = PixiApp.renderer.screen;
+		shaderVulgarityFilter = new PIXI.Filter(null, colorShaderFrag, {
+			u_time: 0.0,
+			u_resolution: [vulgarityFilterContainer.filterArea.width, vulgarityFilterContainer.filterArea.height, 1.0],
+			u_normal_bg: [0.733, 0.949, 0.709],
+			u_progress: 0.0,
+		});
+		vulgarityFilterContainer.filters = [shaderVulgarityFilter];
+	};
+
+	const initCanvas = () => {
+		PixiApp = new PIXI.Application({
+			view: canvasEl,
+			antialias: true, // default: false
+			backgroundColor: 0x9ac395,
+			resizeTo: window,
+		});
+
+		initVulgarityFilter();
+
+		imageContainer = new PIXI.Container();
+		PixiApp.stage.addChild(imageContainer);
+
+		pixiRender();
+	};
+
+	let pixiRender = () => {
+		PixiApp.renderer.render(PixiApp.stage);
+
+		if (!$hasExperienceStarted && !$isLoaderFlow) {
+			animateIntroSlideshow();
+		} else {
+			if (stopMediaPipeLoop) {
+				shaderVulgarityFilter.uniforms.u_time += 0.004;
+				shaderVulgarityFilter.uniforms.u_progress = remap(
+					shaderVulgarityFilter.uniforms.u_progress + 0.005,
+					[0.0, 1.0],
+					[0.0, 1.0],
+					true,
+				);
+			} else if (
+				!stopMediaPipeLoop &&
+				shaderVulgarityFilter.uniforms.u_progress <= 1.0 &&
+				shaderVulgarityFilter.uniforms.u_progress !== 0
+			) {
+				shaderVulgarityFilter.uniforms.u_time += 0.004;
+				shaderVulgarityFilter.uniforms.u_progress = remap(
+					shaderVulgarityFilter.uniforms.u_progress - 0.005,
+					[0.0, 1.0],
+					[0.0, 1.0],
+					true,
+				);
+			}
+		}
+
+		window.requestAnimationFrame(pixiRender);
+	};
+
 
 	onMount(() => {
 		initCanvas();
