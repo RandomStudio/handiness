@@ -31,9 +31,9 @@
 	hasDetectedFirstHand.subscribe((value) => {
 		if (value && !$hasExperienceStarted) {
 			// setTimeout(() => {
-			hasIntroTransitionEnded.set(true);
-			isLoaderFlow.set(false);
-			hasExperienceStarted.set(true);
+				isLoaderFlow.set(false);
+				hasExperienceStarted.set(true);
+				hasIntroTransitionEnded.set(true);
 			// }, 300);
 		}
 	});
@@ -48,14 +48,17 @@
 	};
 </script>
 
-{#if !$hasExperienceStarted}
+<!-- {#if !$hasExperienceStarted} -->
 	<div class="container" out:fade>
 		<section>
-			{#if !$isLoaderFlow}
+			{#if !$isLoaderFlow && !$hasExperienceStarted}
 				<div out:fade={{ duration: 300 }} class="container-intro">
 					<h1>Second Hand</h1>
 					<p>
+						Hand Gesture Image Discovery
+
 						{#if isWebGL2Supported}
+							<br />
 							We'll need camera access for this.
 						{/if}
 					</p>
@@ -69,7 +72,7 @@
 					{/if}
 				</div>
 			{:else}
-				<div transition:fade={{ delay: 100 }} class="container-cta-loader">
+				<div in:fade={{ delay: 100 }} out:fade class="container-cta-loader">
 					{#if $loadedFilesCount !== 7 && canStartVideo}
 						<p out:fade class="text-offset">
 							Loading...
@@ -105,7 +108,7 @@
 			</footer>
 		</section>
 	</div>
-{/if}
+<!-- {/if} -->
 
 <style lang="scss">
 	section {
