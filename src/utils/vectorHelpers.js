@@ -4,8 +4,7 @@ export const getVec2Dot = (vec1, vec2) => {
 	const x = vec1[0] * vec2[0];
 	const y = vec1[1] * vec2[1];
 
-	// cos angle - already in radians?
-	return x + y; // Radians returned if im right
+	return x + y; // Radians
 }
 
 export const getVec2Difference = (vec1, vec2) => {
@@ -15,7 +14,6 @@ export const getVec2Difference = (vec1, vec2) => {
 	const diff = [diffX, diffY];
 
 	return diff;
-	// technically always 90degrees
 }
 
 export const getVec2DirectionEdge = (vec1, vec2) => {
@@ -32,18 +30,4 @@ export const getVec2DirectionEdge = (vec1, vec2) => {
 	}
 
 	return closestDirectionEdge;
-}
-
-
-
-//        _| 
-const calculateAngle = () => {
-    // α = arccos [(b² + c² - a²)/(2bc)]
-    // β = arccos [(a² + c² - b²)/(2ac)]
-    // γ = arccos [(a² + b² - c²)/(2ab)]
-
-	// Point A = Picture Tip
-	// Point B = Webcam Tip
-	// Point C = Edge
-	
 }

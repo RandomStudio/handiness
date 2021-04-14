@@ -3,10 +3,6 @@ const initCamera = (videoEl) => {
 		video: {
 			width: 1280,
 			height: 720,
-			// width: 960,
-			// height: 540,
-			// width: 720,
-			// height: 480,
 		},
 		audio: false,
 		facingMode: 'user', // environment

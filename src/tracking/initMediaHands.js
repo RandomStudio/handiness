@@ -10,7 +10,6 @@ const initMediaHands = () => {
 		}
 	});
 
-
 	hands.setOptions({
 		selfieMode: true,
 		maxNumHands: 1,

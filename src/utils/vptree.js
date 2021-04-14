@@ -13,8 +13,6 @@ export const cosineDistanceMatching = (vec1, vec2) => {
 	const cosineSimilarity = similarity(vec1, vec2);
 	const distance = 2 * (1 - cosineSimilarity);
 
-	// console.log(vec1, vec2, distance, cosineSimilarity);
-
 	return Math.sqrt(distance);
 }
 
@@ -40,19 +38,11 @@ const findMostDistanceSimilar = (vec1, vec2) => {
 			const v2x = vec2[index];
 			const v2y = vec2[index] * 2 + 1;
 
-
-			// vec1.map((v1, index) => Math.pow(v1 - vec2[index], 2));
-
-
 			const distance = Math.sqrt(Math.pow((v1x - v2x), 2) + Math.pow((v1y - v2y), 2));
 
 			distanceSimilarity.push(distance);
 			averageDistance += distance;
 		}
-
-		// console.info(distanceSimilarity, t, t / 4, y, y / 4)
-		// console.info(y, y / 4, Math.sqrt(y));
-		// console.info(t, t / 4);
 
 		return averageDistance / vec1.length;
 	} else {
