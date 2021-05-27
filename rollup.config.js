@@ -46,7 +46,11 @@ export default {
 				// enable run-time checks when not in production
 				dev: !production
 			},
-			preprocess: preprocess()
+			preprocess: preprocess({
+				replace: [
+					['process.env.isProd', production]
+				]
+			})
 		}),
 		// we'll extract any component CSS out into
 		// a separate file - better for performance
@@ -75,6 +79,8 @@ export default {
 			compress: true
 		}),
 
+		
+
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
 		!production && serve(),
@@ -86,7 +92,9 @@ export default {
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
-		production && terser()
+		production && terser(),
+
+		
 	],
 	watch: {
 		// include: ['src/**/*'],
