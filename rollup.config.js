@@ -6,10 +6,9 @@ import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import glslify from 'rollup-plugin-glslify';
 
-
 import preprocess from 'svelte-preprocess';
 
-const production = !process.env.ROLLUP_WATCH;
+const production = process.env.PRODUCTION;
 
 function serve() {
 	let server;
