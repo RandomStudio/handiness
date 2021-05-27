@@ -16,7 +16,7 @@ jobs:
           npm run build -- --mode staging
       - name: "publish"
         run: |
-          npx -p "@getmeli/cli" meli upload ./dist \
+          npx -p "@getmeli/cli" meli upload ./public \
             --url "https://meli.random.studio" \
             --site "$MELI_SITE" \
             --token "$MELI_TOKEN" \
