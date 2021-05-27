@@ -18,7 +18,7 @@
 
 	let isAboutOpen = false;
 
-	let imageHostURL = process.env.isProd ? 'https://doppelhand.s3.eu-central-1.amazonaws.com/images' : '/images';
+	let imageHostURL = 'https://doppelhand.s3.eu-central-1.amazonaws.com/images';
 
 	const startVideo = async () => {
 		const res = await initCamera(videoEl);

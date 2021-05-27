@@ -251,7 +251,7 @@
 
 			const randomFilter = displacementFilters[displacementFilters.length - 1];
 			const random = Math.floor(Math.random() * 10) + 1;
-			const newTexture = PIXI.Texture.from(`/images/${random}.jpg`);
+			const newTexture = PIXI.Texture.from(`${imageHostURL}/${random}.jpg`);
 
 			const newImageSprite = new PIXI.Sprite(newTexture);
 
