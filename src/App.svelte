@@ -4,7 +4,7 @@
 
 	import { buildVPTree } from './utils/vptree';
 
-	import { hasExperienceStarted, isLoaderFlow, loadedFilesCount } from './stores';
+	import { hasExperienceStarted, loadedFilesCount } from './stores';
 
 	import Intro from './components/Intro.svelte';
 	import ExperiencePixi from './components/ExperiencePixi.svelte';
@@ -18,10 +18,7 @@
 
 	let isAboutOpen = false;
 
-	const params = new URLSearchParams(window.location.search);
-	const showSubwayCollection = params.get('subway');
-
-	let imageHostURL = showSubwayCollection ? '/subwayhands-images' : '/images';
+	let imageHostURL = 'https://doppelhand.s3.eu-central-1.amazonaws.com/images';
 
 	const startVideo = async () => {
 		const res = await initCamera(videoEl);
@@ -30,7 +27,7 @@
 			videoEl.play().then(async () => {
 				mediaHands = initMediaHands();
 
-				const handsData = showSubwayCollection ? '/subwayhands.json' : '/output.json';
+				const handsData = '/output.json';
 				const data = await fetch(handsData);
 				dataset = await data.json();
 				loadedFilesCount.increment();

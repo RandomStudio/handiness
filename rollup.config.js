@@ -6,10 +6,9 @@ import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import glslify from 'rollup-plugin-glslify';
 
-
 import preprocess from 'svelte-preprocess';
 
-const production = !process.env.ROLLUP_WATCH;
+const production = process.env.PRODUCTION;
 
 function serve() {
 	let server;
@@ -46,6 +45,7 @@ export default {
 				// enable run-time checks when not in production
 				dev: !production
 			},
+			// preprocess: [replace([['process.env.isProd', production]])]
 			preprocess: preprocess()
 		}),
 		// we'll extract any component CSS out into
@@ -75,6 +75,8 @@ export default {
 			compress: true
 		}),
 
+		
+
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
 		!production && serve(),
@@ -86,7 +88,9 @@ export default {
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
-		production && terser()
+		production && terser(),
+
+		
 	],
 	watch: {
 		// include: ['src/**/*'],

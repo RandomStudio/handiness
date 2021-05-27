@@ -52,7 +52,7 @@
 	<section>
 		{#if !$isLoaderFlow && !$hasExperienceStarted}
 			<div out:fade={{ duration: 300 }} class="container-intro">
-				<h1>Second Hand</h1>
+				<h1>Handiness</h1>
 				<p>
 					Hand Gesture Image Discovery
 
