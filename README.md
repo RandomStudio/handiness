@@ -12,7 +12,7 @@ Repo for a R&D experiment on real-time handtracking on the web using Google's Me
 Install the dependencies...
 
 ```bash
-cd svelte-app
+cd handiness
 npm install
 ```
 
